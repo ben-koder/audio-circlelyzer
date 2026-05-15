@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -7,7 +7,6 @@ import {
   OctaveFilterResult
 } from '../types';
 import { Data2D, PlotData, Plot2DOptions, PlotType2D } from '../../plotting/types';
-import { OctaveBars } from '../../components/visualizations/octave-bars/octave-bars';
 
 /**
  * VIS_OCTBARS - Octave band bar chart visualization
@@ -124,7 +123,4 @@ export class OctaveBarsVisualization implements VisualizationType<OctaveVisualiz
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return OctaveBars;
-  }
 }

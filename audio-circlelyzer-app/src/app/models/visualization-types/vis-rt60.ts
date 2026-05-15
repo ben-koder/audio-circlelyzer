@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -10,7 +10,6 @@ import {
   RT60Metric
 } from '../types';
 import { Data2D, PlotData, Plot2DOptions, PlotType2D } from '../../plotting/types';
-import { Rt60Decay } from '../../components/visualizations/rt60-decay/rt60-decay';
 
 const METRIC_ORDER: RT60Metric[] = ['edt', 't20', 't30', 'topt'];
 // Each audio channel reserves: 1 decay curve + one slot per supported metric.
@@ -203,7 +202,4 @@ export class RT60Visualization implements VisualizationType<RT60VisualizationSet
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return Rt60Decay;
-  }
 }

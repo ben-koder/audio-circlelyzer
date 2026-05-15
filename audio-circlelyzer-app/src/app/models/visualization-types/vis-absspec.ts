@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   SpectrumVisualizationSettings
 } from '../types';
 import { Data2D, PlotData, Plot2DOptions, PlotType2D } from '../../plotting/types';
-import { FrequencySpectrum } from '../../components/visualizations/frequency-spectrum/frequency-spectrum';
 
 /**
  * VIS_ABSSPEC - Frequency spectrum magnitude visualization
@@ -135,7 +134,4 @@ export class AbsSpecVisualization implements VisualizationType<SpectrumVisualiza
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return FrequencySpectrum;
-  }
 }

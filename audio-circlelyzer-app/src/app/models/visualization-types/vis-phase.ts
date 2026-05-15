@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   SpectrumVisualizationSettings
 } from '../types';
 import { Data2D, PlotData, Plot2DOptions, PlotType2D } from '../../plotting/types';
-import { PhaseSpectrum } from '../../components/visualizations/phase-spectrum/phase-spectrum';
 
 /**
  * VIS_PHASE - Phase spectrum visualization
@@ -135,7 +134,4 @@ export class PhaseVisualization implements VisualizationType<SpectrumVisualizati
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return PhaseSpectrum;
-  }
 }

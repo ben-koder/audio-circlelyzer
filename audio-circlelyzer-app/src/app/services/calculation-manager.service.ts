@@ -40,7 +40,7 @@ import { AudioEngineService } from './audio-engine.service';
 import { ScriptParserService } from './script-parser.service';
 import { PlotPreferencesService } from './plot-preferences.service';
 import { CALCULATION_SETTINGS_UI } from '../models/calculation-types-ui';
-import { VISUALIZATION_SETTINGS_UI } from '../models/visualization-types-ui';
+import { VISUALIZATION_SETTINGS_UI, VISUALIZATION_DISPLAY_UI } from '../models/visualization-types-ui';
 
 @Injectable({
   providedIn: 'root'
@@ -89,7 +89,9 @@ export class CalculationManagerService {
   public activeFrequencyRange = signal<{ low: number; high: number } | null>(null);
   private initializationPromise: Promise<void>;
   private audioEngine = inject(AudioEngineService);
-  private scriptParser = inject(ScriptParserService);
+  // ScriptParserService is a plain class (no @Injectable) so it can be safely
+  // imported by the calculation worker without triggering Angular JIT.
+  private scriptParser = new ScriptParserService();
   private plotPreferences = inject(PlotPreferencesService);
 
   constructor(private wasmService: WasmService) {
@@ -147,6 +149,9 @@ export class CalculationManagerService {
       this.visualizationTypes.set(type.id, type);
       if (VISUALIZATION_SETTINGS_UI[type.id]) {
         type.getSettingsUI = () => VISUALIZATION_SETTINGS_UI[type.id];
+      }
+      if (VISUALIZATION_DISPLAY_UI[type.id]) {
+        type.getVisualizationUI = () => VISUALIZATION_DISPLAY_UI[type.id];
       }
     });
   }

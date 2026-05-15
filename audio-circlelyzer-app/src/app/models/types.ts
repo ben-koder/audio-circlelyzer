@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import {
   Data2D, Data3D, PlotData, HeatmapData,
   PlotType2D, PlotType3D,

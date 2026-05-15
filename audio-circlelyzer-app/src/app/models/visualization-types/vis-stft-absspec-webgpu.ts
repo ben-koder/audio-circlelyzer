@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   STFTVisualizationSettings,
 } from '../types';
 import { Data3D, PlotData, Plot3DOptions, PlotType3D } from '../../plotting/types';
-import { StftWaterfall } from '../../components/visualizations/stft-waterfall/stft-waterfall';
 
 /**
  * VIS_STFT_ABSSPEC - STFT 3D Waterfall visualization with WebGPU
@@ -160,7 +159,4 @@ export class STFTWaterfallWebGPUVisualization implements VisualizationType<STFTV
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return StftWaterfall;
-  }
 }

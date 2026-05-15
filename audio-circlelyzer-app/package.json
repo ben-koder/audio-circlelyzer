@@ -11,6 +11,8 @@
     "start": "npm run build:wasm && ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "serve:dist": "node scripts/serve-dist.mjs",
+    "preview": "npm run build && node scripts/serve-dist.mjs",
     "test": "ng test"
   },
   "prettier": {

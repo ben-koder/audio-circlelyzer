@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import {
   VisualizationType,
   CalculationContext,
@@ -6,7 +6,6 @@ import {
   SpectrumVisualizationSettings
 } from '../types';
 import { Data2D, PlotData, Plot2DOptions, PlotType2D } from '../../plotting/types';
-import { PhaseSpectrum } from '../../components/visualizations/phase-spectrum/phase-spectrum';
 
 /**
  * Shared data preparation for delay-vs-frequency visualizations.
@@ -134,9 +133,6 @@ export class GroupDelayVisualization implements VisualizationType<SpectrumVisual
     updateDelayPlotData(remapped, plotData, settings, ctx);
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return PhaseSpectrum;
-  }
 }
 
 /**
@@ -212,7 +208,4 @@ export class PhaseDelayVisualization implements VisualizationType<SpectrumVisual
     updateDelayPlotData(remapped, plotData, settings, ctx);
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return PhaseSpectrum;
-  }
 }

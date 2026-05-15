@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   STFTVisualizationSettings,
 } from '../types';
 import { Data3D, PlotData, Plot3DOptions, PlotType3D } from '../../plotting/types';
-import { StftWaterfall } from '../../components/visualizations/stft-waterfall/stft-waterfall';
 
 /**
  * Canvas 2D implementation of the STFT 3D waterfall visualization.
@@ -137,7 +136,4 @@ export class STFTWaterfallVisualization implements VisualizationType<STFTVisuali
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return StftWaterfall;
-  }
 }

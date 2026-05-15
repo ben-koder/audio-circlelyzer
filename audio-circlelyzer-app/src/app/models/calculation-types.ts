@@ -1,12 +1,11 @@
 import { CalculationType, CalculationContext, ComplexSpectrum, RT60Result, RT60FullResult, DecayMeasurement, OctaveFilterResult, CONTEXT_KEY, COMPUTATION_TYPE_ID, ChannelSumSettings, BandpassSettings, ExpandSettings, CompactSettings, InputNSettings, NoisefloorSettings, WienerDivideSettings, RT60Settings as RT60SettingsType, TraceSettings, ResultDimensionInfo } from './types';
-import { WasmService } from '../services/wasm.service';
-import type { PolyFitData } from '../services/wasm.service';
-import { Type } from '@angular/core';
-import { OctaveFilterSettingsComponent } from '../components/settings-dialog/calculation-settings/octave-filter-settings';
-import { ExpandSettingsComponent } from '../components/settings-dialog/calculation-settings/expand-settings';
-import { CompactSettingsComponent } from '../components/settings-dialog/calculation-settings/compact-settings';
-import { InputNSettingsComponent } from '../components/settings-dialog/calculation-settings/inputn-settings';
-import { TraceSettingsComponent } from '../components/settings-dialog/calculation-settings/trace-settings';
+// WasmService and PolyFitData are imported as types only. Angular decorators
+// must NOT be pulled into this module because it is consumed by the calculation
+// web worker (whose bundle is not processed by Angular's AOT compiler — any
+// runtime @Injectable evaluation would throw "JIT compiler unavailable"). The
+// settings-dialog component bindings live in calculation-types-ui.ts and are
+// attached at runtime by CalculationManagerService.
+import type { WasmService, PolyFitData } from '../services/wasm.service';
 
 // Helper function to repeat channels to match target count
 function repeatChannelsToMatch(input: any[], targetCount: number): any[] {
@@ -903,9 +902,6 @@ export class OCTFILTERRMSCalculation implements CalculationType<OctaveFilterSett
     copyChannelLabels(spectrumChannels, result as unknown as OctaveFilterResult[]);
   }
 
-  getSettingsUI(): Type<any> {
-    return OctaveFilterSettingsComponent;
-  }
 
   getResultDimensions(key: string, ctx: CalculationContext): ResultDimensionInfo[] {
     const settings = ctx.calculationSettings.get(key) as OctaveFilterSettings;
@@ -1439,9 +1435,6 @@ export class EXPANDCalculation implements CalculationType<ExpandSettings, Comple
     return ctx.getDependencies?.(key) || [];
   }
 
-  getSettingsUI(): Type<any> {
-    return ExpandSettingsComponent;
-  }
 
   getResultDimensions(key: string, ctx: CalculationContext): ResultDimensionInfo[] {
     const settings = ctx.calculationSettings.get(key) as ExpandSettings;
@@ -1624,9 +1617,6 @@ export class COMPACTCalculation implements CalculationType<CompactSettings, Comp
     return ctx.getDependencies?.(key) || [];
   }
 
-  getSettingsUI(): Type<any> {
-    return CompactSettingsComponent;
-  }
 
   getResultDimensions(key: string, ctx: CalculationContext): ResultDimensionInfo[] {
     return [
@@ -1713,9 +1703,6 @@ export class INPUTNCalculation implements CalculationType<InputNSettings, Float3
     return ctx.getDependencies?.(key) || [];
   }
 
-  getSettingsUI(): Type<any> {
-    return InputNSettingsComponent;
-  }
 
   getResultDimensions(key: string, ctx: CalculationContext): ResultDimensionInfo[] {
     const settings = ctx.calculationSettings.get(key) as InputNSettings;
@@ -2555,9 +2542,6 @@ export class TRACECalculation implements CalculationType<TraceSettings, TraceRes
     return ctx.getDependencies?.(key) || [];
   }
 
-  getSettingsUI(): Type<any> {
-    return TraceSettingsComponent;
-  }
 
   getResultDimensions(key: string, ctx: CalculationContext): ResultDimensionInfo[] {
     const settings = ctx.calculationSettings.get(key) as TraceSettings;

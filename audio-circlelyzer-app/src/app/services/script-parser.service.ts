@@ -1,4 +1,3 @@
-import { Injectable } from '@angular/core';
 import { CONTEXT_KEY } from '../models/types';
 
 export interface ParsedOperation {
@@ -20,9 +19,13 @@ export interface ParsedScript {
   argDefinitions: Map<string, any>;  // arg variable definitions
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+/**
+ * Pure utility class for parsing calculation scripts.
+ * Intentionally NOT decorated with @Injectable so it can be safely imported
+ * by the calculation web worker (the worker bundle is not processed by
+ * Angular's AOT compiler, so any @Injectable decorator in worker-imported
+ * code would trigger "JIT compiler unavailable" at runtime in production).
+ */
 export class ScriptParserService {
   parse(script: string): ParsedScript {
     const lines = this.splitIntoStatements(script);

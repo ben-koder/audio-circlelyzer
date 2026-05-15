@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   STFTVisualizationSettings
 } from '../types';
 import { HeatmapData, PlotData, Plot2DOptions, PlotType2D, AxisMetadata } from '../../plotting/types';
-import { StftHeatmap } from '../../components/visualizations/stft-heatmap/stft-heatmap';
 
 /**
  * VIS_STFT_ABSSPEC_HEATMAP - STFT Heatmap visualization
@@ -153,7 +152,4 @@ export class STFTHeatmapVisualization implements VisualizationType<STFTVisualiza
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return StftHeatmap;
-  }
 }

@@ -1,4 +1,4 @@
-import { Type } from '@angular/core';
+import type { Type } from '@angular/core';
 import { 
   VisualizationType, 
   CalculationContext, 
@@ -6,7 +6,6 @@ import {
   TraceVisualizationSettings,
 } from '../types';
 import { Data3D, PlotData, Plot3DOptions, PlotType3D } from '../../plotting/types';
-import { TraceWaterfall } from '../../components/visualizations/trace-waterfall/trace-waterfall';
 
 // Import TraceResult type from calculation types
 interface TraceResult {
@@ -188,7 +187,4 @@ export class TraceWebGPUVisualization implements VisualizationType<TraceVisualiz
     }
   }
 
-  getVisualizationUI(key: string, ctx: CalculationContext): Type<any> {
-    return TraceWaterfall;
-  }
 }
