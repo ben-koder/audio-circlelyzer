@@ -19,7 +19,7 @@ source:
 scriptVariables: {}
 settings:
   nc: 32768
-  n_y: 100
+  n_y: 80
 defaultFrequencyRange:
   low: 40
   high: 20000

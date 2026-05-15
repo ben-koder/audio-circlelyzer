@@ -1,0 +1,84 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; don't cancel in-progress deployments.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            audio-circlelyzer-lib
+            audio-circlelyzer-wasm
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            audio-circlelyzer-worklet/package-lock.json
+            audio-circlelyzer-app/package-lock.json
+
+      - name: Install worklet dependencies
+        run: npm --prefix audio-circlelyzer-worklet ci
+
+      - name: Build AudioWorklet
+        run: npm --prefix audio-circlelyzer-worklet run build
+
+      - name: Install app dependencies
+        run: npm --prefix audio-circlelyzer-app ci --ignore-scripts
+
+      - name: Build WASM
+        run: npm --prefix audio-circlelyzer-app run build:wasm
+
+      - name: Build Angular app
+        # base_path is e.g. "/audio-circlelyzer" for a project page, "" for a user/org page.
+        run: >
+          npm --prefix audio-circlelyzer-app run build --
+          --base-href "${{ steps.pages.outputs.base_path }}/"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: audio-circlelyzer-app/dist/audio-circlelyzer-app/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

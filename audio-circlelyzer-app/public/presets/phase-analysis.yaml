@@ -20,7 +20,7 @@ signalType: PERFECT_WHITE
 scriptVariables: {}
 settings:
   nc: 8192
-  n_y: 11
+  n_y: 80
 defaultFrequencyRange:
   low: 40
   high: 20000

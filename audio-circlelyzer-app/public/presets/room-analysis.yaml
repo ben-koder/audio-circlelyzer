@@ -5,7 +5,7 @@ signalType: PERFECT_PINK
 scriptVariables: {}
 settings:
   nc: 32768 # 65536
-  n_y: 20
+  n_y: 80
 defaultFrequencyRange:
   low: 40
   high: 20000
