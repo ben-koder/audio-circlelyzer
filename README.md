@@ -88,6 +88,10 @@ are the authors, most code, theory descriptions and derivations are AI generated
 
 The software is usable, but there are bugs and know issues.
 
+## Demo
+
+A demo is available here: https://ben-koder.github.io/audio-circlelyzer/
+
 ## License
 
 Released under the [GNU General Public License v3.0](LICENSE).

@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 import { DemoCatalogEntry, DemoCatalogManifest } from '../models/demo-catalog';
 import { RecordingArchiveDocument } from '../models/recording-archive';
@@ -9,6 +10,7 @@ import { RecordingArchiveService } from './recording-archive.service';
 })
 export class DemoCatalogService {
   private readonly archiveService = inject(RecordingArchiveService);
+  private readonly document = inject(DOCUMENT);
   private readonly archiveCache = new Map<string, RecordingArchiveDocument>();
 
   readonly demos = signal<DemoCatalogEntry[]>([]);
@@ -24,7 +26,7 @@ export class DemoCatalogService {
     this.loadError.set(null);
 
     try {
-      const response = await fetch('/testdata/index.json');
+      const response = await fetch(new URL('testdata/index.json', this.document.baseURI).href);
       if (!response.ok) {
         throw new Error(`Could not load demo catalog: ${response.status}`);
       }
@@ -53,7 +55,10 @@ export class DemoCatalogService {
       throw new Error(`Unknown demo entry: ${entryId}`);
     }
 
-    const response = await fetch(entry.archivePath);
+    // archivePath in the manifest uses root-relative paths (e.g. /testdata/...).
+    // Strip the leading slash so new URL() resolves it against <base href>.
+    const archiveUrl = new URL(entry.archivePath.replace(/^\//, ''), this.document.baseURI).href;
+    const response = await fetch(archiveUrl);
     if (!response.ok) {
       throw new Error(`Could not load demo archive: ${response.status}`);
     }

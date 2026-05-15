@@ -1,9 +1,12 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AudioEngineService {
+  private readonly document = inject(DOCUMENT);
+
   private audioContext: AudioContext | null = null;
   private recordingNode: AudioWorkletNode | null = null;
   private mediaStream: MediaStream | null = null;
@@ -51,8 +54,10 @@ export class AudioEngineService {
     try {
       this.audioContext = new AudioContext({ sampleRate });
       
-      // Load and register AudioWorklet
-      await this.audioContext.audioWorklet.addModule('/recording-processor.worklet.js');
+      // Load and register AudioWorklet — resolve relative to <base href> for sub-path deployments.
+      await this.audioContext.audioWorklet.addModule(
+        new URL('recording-processor.worklet.js', this.document.baseURI).href
+      );
       
       // Create AudioWorkletNode
       this.recordingNode = new AudioWorkletNode(
