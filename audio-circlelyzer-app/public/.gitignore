@@ -1,0 +1,10 @@
+# WASM artifacts copied here by `npm run build:wasm`.
+# Excluded from git — build from Rust source or check the build instructions.
+audio_circlelyzer_wasm_bg.wasm
+audio_circlelyzer_wasm_bg.wasm.d.ts
+audio_circlelyzer_wasm.d.ts
+audio_circlelyzer_wasm.js
+package.json
+
+# AudioWorklet JS built by `npm --prefix audio-circlelyzer-worklet run build`
+recording-processor.worklet.js

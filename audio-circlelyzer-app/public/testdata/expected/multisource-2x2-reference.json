@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "kind": "multi-source-matrix",
+  "sampleRate": 48000.0,
+  "paths": {
+    "source0_to_mic0": {
+      "delaySamples": 18,
+      "gain": 1.0
+    },
+    "source1_to_mic0": {
+      "delaySamples": 84,
+      "gain": 0.34
+    },
+    "source0_to_mic1": {
+      "delaySamples": 46,
+      "gain": 0.52
+    },
+    "source1_to_mic1": {
+      "delaySamples": 118,
+      "gain": 0.85
+    }
+  },
+  "toleranceSamples": 10,
+  "gainTolerance": 0.08
+}

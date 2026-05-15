@@ -1,0 +1,175 @@
+<div class="app-container">
+  <app-top-bar
+    [contextPresets]="contextPresets()"
+    [currentPreset]="currentPreset()"
+    [currentSourceConfig]="currentSourceConfig()"
+    [(sourceSettingsOpen)]="sourceSettingsOpen"
+    [(selectedSyntheticType)]="syntheticType"
+    (presetChanged)="switchPreset($event)"
+    (sourceConfigChanged)="updateSourceConfig($event)"
+    (sidebarToggleRequested)="toggleSidebar()">
+  </app-top-bar>
+
+  <div class="drawer lg:drawer-open app-drawer">
+    <input id="workspace-drawer" type="checkbox" class="drawer-toggle" [checked]="sidebarOpen()" (change)="sidebarOpen.set($any($event.target).checked)" />
+
+    <div class="drawer-content app-workspace" [class.app-workspace--expanded]="boardHeight() !== null">
+      <main class="main-content">
+        @if (layoutTree()) {
+          <div class="workspace-grid" [class.workspace-grid--offline]="isOfflineMode()">
+            <section class="analysis-shell">
+              @if (isOfflineMode()) {
+                <div class="waveform-wrapper" [style.height.px]="waveformHeight()">
+                  <app-recording-waveform-panel
+                    [recording]="selectedRecording()"
+                    [waveform]="waveformPreview()"
+                    [positionRatio]="offlinePositionRatio()"
+                    [hopRatio]="recordingHopRatio()"
+                    [compatibility]="selectedRecordingCompatibility()"
+                    [demoEntry]="selectedDemoEntry()"
+                    [canValidateDemo]="canValidateSelectedDemo()"
+                    [validationState]="demoValidationState()"
+                    [validationReport]="demoValidationReport()"
+                    [validationError]="demoValidationError()"
+                    (positionChanged)="updateOfflinePosition($event)"
+                    (stepRequested)="stepOfflinePosition($event)"
+                    (validationRequested)="validateSelectedDemo()">
+                  </app-recording-waveform-panel>
+                </div>
+                <div
+                  class="resize-bar"
+                  title="Drag to resize waveform panel"
+                  (pointerdown)="startWaveformResize($event)">
+                  <div class="resize-bar__thumb"></div>
+                </div>
+              }
+
+              <section class="analysis-board" [class.analysis-board--full]="!isOfflineMode()" [class.analysis-board--fixed]="boardHeight() !== null" [style.height.px]="boardHeight()">
+                @if (!isOfflineMode() || (selectedRecording() && (!selectedRecordingCompatibility() || selectedRecordingCompatibility()!.compatible))) {
+                  <div class="analysis-board__canvas">
+                    <app-split-pane [node]="layoutTree()" [contextId]="currentContextId()"></app-split-pane>
+                  </div>
+                } @else {
+                  <div class="analysis-placeholder">
+                    <h2>Offline Analysis</h2>
+                    <p>{{ offlineAnalysisMessage() }}</p>
+                  </div>
+                }
+              </section>
+              <div
+                class="resize-bar resize-bar--board"
+                title="Drag to resize analysis board"
+                (pointerdown)="startBoardResize($event)">
+                <div class="resize-bar__thumb"></div>
+              </div>
+            </section>
+          </div>
+        } @else {
+          <div class="loading-message">Loading presets...</div>
+        }
+      </main>
+    </div>
+
+    <div class="drawer-side">
+      <label for="workspace-drawer" class="drawer-overlay"></label>
+      <div class="app-sidebar">
+        <div class="app-sidebar__scroll">
+        <app-recording-library-sidebar
+          [contextPresets]="contextPresets()"
+          [selectedPresetId]="currentPreset()?.id ?? null"
+          [demoEntries]="demoEntries()"
+          [selectedDemoId]="selectedDemoId()"
+          [demoCatalogState]="demoCatalogLoadState()"
+          [demoCatalogError]="demoCatalogLoadError()"
+          [recordings]="recordings()"
+          [selectedRecordingId]="selectedRecordingId()"
+          [unsavedRecordingIds]="unsavedRecordingIds()"
+          [isOfflineMode]="isOfflineMode()"
+          [canSaveRecordingArchive]="!!selectedRecording()"
+          [currentPreset]="currentPreset()"
+          [builtInPresetCount]="builtInPresetCount()"
+          [userPresetCount]="userPresetCount()"
+          [sourcePrimaryLabel]="sourcePrimaryLabel()"
+          [syntheticType]="syntheticType()"
+          [syntheticTypeOptions]="syntheticTypeOptions"
+          [isOnlineMode]="!isOfflineMode()"
+          [isRecording]="isRecording()"
+          [presetToolsOpen]="sidebarPresetToolsOpen()"
+          (presetToolsOpenChange)="sidebarPresetToolsOpen.set($event)"
+          (sourceSettingsRequested)="sourceSettingsOpen.set(true)"
+          (syntheticTypeChanged)="syntheticType.set($any($event))"
+          (analysisModeChanged)="onSidebarModeChange($event)"
+          (presetSelected)="switchPreset($event); closeSidebar()"
+          (demoLoadRequested)="loadDemoRecording($event); closeSidebar()"
+          (recordingSelected)="selectRecording($event); closeSidebar()"
+          (recordingRemoved)="deleteRecording($event)"
+          (recordingSaveRequested)="markRecordingSaved($event)"
+          (recordingRenamed)="renameRecording($event)"
+          (workspaceExportRequested)="exportWorkspace()"
+          (workspaceImportRequested)="importWorkspace()"
+          (presetSaveRequested)="saveCurrentPreset($event); closeSidebar()"
+          (presetImportRequested)="importPreset(); closeSidebar()"
+          (presetExportRequested)="exportCurrentPreset(); closeSidebar()"
+          (presetDeleteRequested)="deleteCurrentPreset(); closeSidebar()">
+        </app-recording-library-sidebar>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar modals rendered at root level to escape will-change:transform containing block -->
+@if (sidebarPresetToolsOpen()) {
+  <div class="library-modal">
+    <div class="library-modal__box">
+      <div class="library-modal__header">
+        <div>
+          <p class="library-modal__eyebrow">Preset</p>
+          <h3>Manage</h3>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm btn-square" (click)="sidebarPresetToolsOpen.set(false)">✕</button>
+      </div>
+
+      <app-preset-management-panel
+        [currentPreset]="currentPreset()"
+        [builtInPresetCount]="builtInPresetCount()"
+        [userPresetCount]="userPresetCount()"
+        (saveRequested)="saveCurrentPreset($event); sidebarPresetToolsOpen.set(false)"
+        (importRequested)="importPreset(); sidebarPresetToolsOpen.set(false)"
+        (exportRequested)="exportCurrentPreset(); sidebarPresetToolsOpen.set(false)"
+        (deleteRequested)="deleteCurrentPreset(); sidebarPresetToolsOpen.set(false)">
+      </app-preset-management-panel>
+
+      <div class="modal-action mt-0">
+        <button type="button" class="btn" (click)="sidebarPresetToolsOpen.set(false)">Done</button>
+      </div>
+    </div>
+    <div class="library-modal__backdrop" (click)="sidebarPresetToolsOpen.set(false)"></div>
+  </div>
+}
+
+@if (clearWorkspaceConfirmOpen()) {
+  <div class="library-modal">
+    <div class="library-modal__box">
+      <div class="library-modal__header">
+        <div>
+          <p class="library-modal__eyebrow">Workspace</p>
+          <h3>Clear after save?</h3>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm btn-square" (click)="clearWorkspaceConfirmOpen.set(false)">✕</button>
+      </div>
+
+      <p class="text-sm opacity-80">
+        Your workspace was exported successfully. Would you like to clear all
+        recordings from the live workspace now? You can always re-import the
+        downloaded file later.
+      </p>
+
+      <div class="modal-action mt-0">
+        <button type="button" class="btn btn-ghost btn-sm" (click)="clearWorkspaceConfirmOpen.set(false)">Keep</button>
+        <button type="button" class="btn btn-error btn-sm" (click)="confirmClearWorkspace()">Clear workspace</button>
+      </div>
+    </div>
+    <div class="library-modal__backdrop" (click)="clearWorkspaceConfirmOpen.set(false)"></div>
+  </div>
+}

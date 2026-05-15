@@ -1,0 +1,350 @@
+<header class="top-bar-shell">
+  <div class="top-bar-shell__start">
+    <button class="btn btn-ghost btn-square top-bar-shell__drawer-toggle lg:hidden" (click)="requestSidebarToggle()" aria-label="Open sidebar">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+    </button>
+
+    <!-- Circular brand coin -->
+    <div class="brand-coin" title="Audio Circlelyzer">
+      <svg viewBox="0 0 64 64" class="brand-coin__svg" aria-label="Audio Circlelyzer">
+        <defs>
+
+          <!-- Clip path: circle matching ring inner edge exactly (r=27 - 9/2 = 22.5) -->
+          <clipPath id="inner-clip">
+            <circle cx="32" cy="32" r="22.5"/>
+          </clipPath>
+          <!-- 3/4 arc at r=26: text inset 1px from ring center, adds outer margin -->
+          <path id="brand-arc" d="M 13.6,50.4 A 26,26 0 1,1 50.4,50.4"/>
+        </defs>
+        <!-- Static logo: clipped to circle that aligns exactly with ring inner edge -->
+        <image href="/branding/logo-minimal-dark.svg" x="9.5" y="9.5" width="45" height="45" preserveAspectRatio="xMidYMid meet" clip-path="url(#inner-clip)"/>
+        <!-- Spinning ring + text -->
+        <g class="brand-arc-ring">
+          <!-- Solid ring track matching icon background -->
+          <circle cx="32" cy="32" r="27" fill="none" stroke="#0f172a" stroke-width="9" class="brand-ring-track"/>
+          <!-- Arc text vertically centered in the ring via dominant-baseline=middle -->
+          <text class="brand-arc-text" dominant-baseline="middle">
+            <textPath href="#brand-arc" startOffset="50%" text-anchor="middle">AUDIO CIRCLELYZER</textPath>
+          </text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="top-bar-shell__center">
+    <div class="top-bar-rail">
+
+      <!-- Mute toggle -->
+      <button class="btn btn-ghost btn-circle btn-sm transport-mute"
+        (click)="toggleMute()"
+        [class.transport-mute--muted]="isMuted()"
+        [attr.aria-label]="isMuted() ? 'Unmute playback' : 'Mute playback'"
+        [attr.aria-pressed]="isMuted()">
+        @if (isMuted()) {
+          <!-- Speaker crossed out -->
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="transport-icon">
+            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+          </svg>
+        } @else {
+          <!-- Speaker with waves -->
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="transport-icon">
+            <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+        }
+      </button>
+
+      @if (!simulationMode()) {
+        <!-- Main Record button (live mode only) -->
+        <button class="btn btn-circle record-btn"
+          [class.record-btn--active]="audioEngine.isRecording()"
+          (click)="onMainRecordPress()"
+          [disabled]="!canRecord()"
+          [attr.aria-label]="audioEngine.isRecording() ? 'Stop recording' : 'Start recording'">
+          @if (audioEngine.isRecording()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="record-btn__icon record-btn__icon--stop">
+              <rect x="5" y="5" width="14" height="14" rx="2"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="record-btn__icon record-btn__icon--idle">
+              <circle cx="12" cy="12" r="7"/>
+            </svg>
+          }
+        </button>
+      } @else {
+        <!-- Sim button (simulation mode only) -->
+        <button class="btn btn-circle record-btn record-btn--sim"
+          [class.record-btn--simulating]="audioEngine.isSimulatedRecording()"
+          (click)="toggleSimulatedRecording()"
+          [disabled]="!canRecord()"
+          [attr.aria-label]="audioEngine.isSimulatedRecording() ? 'Stop simulation' : 'Start simulation'">
+          @if (audioEngine.isSimulatedRecording()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="record-btn__icon record-btn__icon--stop">
+              <rect x="5" y="5" width="14" height="14" rx="2"/>
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="transport-icon">
+              <circle cx="12" cy="12" r="3" fill="currentColor"/>
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+          }
+        </button>
+      }
+
+      <!-- Status dot (subtle) -->
+      <span class="transport-status" [class.transport-status--recording]="audioEngine.isRecording()" [class.transport-status--simulating]="audioEngine.isSimulatedRecording()" [class.transport-status--playing]="audioEngine.isPlaying() && !audioEngine.isRecording()">
+        {{ transportStatusLabel() }}
+      </span>
+
+    </div>
+  </div>
+
+  <div class="top-bar-shell__end">
+
+    <!-- Source dropdown panel -->
+    <div class="top-end-btn-group">
+    <details class="dropdown dropdown-bottom dropdown-end source-drop-host" #sourceDrop>
+      <summary class="btn btn-primary source-drop-btn"
+        [attr.aria-label]="'Source: ' + compactSourceSummary()">
+        <div class="top-end-btn__content">
+          <span class="top-end-btn__line1">{{ sourceSummaryLine1() }}</span>
+          <span class="top-end-btn__line2">{{ sourceSummaryLine2() }}</span>
+          <span class="top-end-btn__line2">{{ sourceSummaryLine3() }}</span>
+        </div>
+        <span class="top-end-btn-label">Source</span>
+      </summary>
+      <div class="source-panel">
+        <div class="source-panel__header">
+          <span class="source-panel__title">Source</span>
+          <span class="source-panel__subtitle">{{ sourceGroupLabel() }}</span>
+        </div>
+
+        @if (sourceLocked()) {
+          <div class="source-panel__locked-banner" role="note"
+            aria-label="Source settings locked to selected recording">
+            <div class="source-panel__locked-banner-text">
+              Editing settings for the <strong>next new recording</strong>.
+              The selected library recording uses the locked settings shown
+              below and cannot be changed.
+            </div>
+            <dl class="source-panel__locked-list">
+              @for (item of lockedSourceSummary(); track item.label) {
+                <div class="source-panel__locked-item">
+                  <dt>{{ item.label }}</dt>
+                  <dd>{{ item.value }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        }
+
+        <div class="source-panel__toggles">
+          <label class="cursor-pointer flex items-center gap-2 text-xs">
+            <input type="checkbox" class="toggle toggle-xs toggle-primary"
+              [checked]="simulationMode()" (change)="toggleSimulationMode()" />
+            <span>Simulation / dev mode</span>
+          </label>
+        </div>
+
+        <div class="source-panel__section">
+          <div class="source-panel__section-title">Buffer Size</div>
+          <div class="source-panel__buttons">
+            @for (option of bufferSizeOptions(); track option.value) {
+              <button type="button" class="btn btn-xs source-option-btn"
+                [class.btn-primary]="editableSourceConfig()?.circularLength === option.value"
+                [class.btn-ghost]="editableSourceConfig()?.circularLength !== option.value"
+                (click)="setBufferSize(option.value)">
+                <span class="source-option-btn__primary">{{ option.durationLabel }}</span>
+                <span class="source-option-btn__secondary">{{ option.sampleLabel }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="source-panel__section">
+          <div class="source-panel__section-title">Averaging (n_average)</div>
+          <div class="source-panel__buttons">
+            @for (option of nAverageOptions(); track option.value) {
+              <button type="button" class="btn btn-xs"
+                [class.btn-primary]="nAverage() === option.value"
+                [class.btn-ghost]="nAverage() !== option.value"
+                [disabled]="option.disabled"
+                (click)="setNAverage(option.value)">{{ option.label }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="source-panel__section">
+          <div class="source-panel__section-title">Signal Type</div>
+          <div class="source-panel__group">
+            <div class="source-panel__buttons">
+              @for (signalType of signalTypeOptions(); track signalType.value) {
+                <button type="button" class="btn btn-xs"
+                  [class.btn-primary]="editableSourceConfig()?.signalType === signalType.value"
+                  [class.btn-ghost]="editableSourceConfig()?.signalType !== signalType.value"
+                  (click)="setSignalType(signalType.value)">{{ signalType.label }}</button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="source-panel__section">
+          <div class="source-panel__section-title">Channels</div>
+          <div class="source-panel__sub-section">
+            <div class="source-panel__sub-title">Routing</div>
+            <div class="source-panel__buttons">
+              @for (routing of routingModeOptions(); track routing.value) {
+                <button type="button" class="btn btn-xs"
+                  [class.btn-primary]="editableSourceConfig()?.routingMode === routing.value"
+                  [class.btn-ghost]="editableSourceConfig()?.routingMode !== routing.value"
+                  (click)="setRoutingMode(routing.value)">{{ routing.label }}</button>
+              }
+            </div>
+          </div>
+          <div class="source-panel__sub-section">
+            <div class="source-panel__sub-title">Output channels</div>
+            <div class="source-panel__buttons">
+              @for (count of outputChannelCountOptions(); track count.value) {
+                <button type="button" class="btn btn-xs"
+                  [class.btn-primary]="editableSourceConfig()?.outputChannelCount === count.value"
+                  [class.btn-ghost]="editableSourceConfig()?.outputChannelCount !== count.value"
+                  (click)="setOutputChannelCount(count.value)">{{ count.label }}</button>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (editableSourceConfig()?.signalType === 'WAVE_FILE') {
+          <div class="source-panel__section source-panel__wave-file">
+            <div class="source-panel__section-title">Wave File</div>
+            <div class="source-panel__wave-file-row">
+              <div class="source-panel__wave-file-info">
+                <strong>{{ waveFileDisplayName() }}</strong>
+                <p>{{ waveFileStatus() }}</p>
+              </div>
+              <button class="btn btn-outline btn-xs" type="button"
+                [disabled]="sourceLocked()"
+                [title]="sourceLocked() ? 'Switch to live mode to change wave file for the next recording' : ''"
+                (click)="changeWaveFile()">
+                {{ waveFileActionLabel() }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </details>
+    
+    </div>
+
+    <!-- Position offset dropdown (slider panel) -->
+    <div class="top-end-btn-group">
+    <details class="offset-drop-host" #offsetDrop>
+      <summary class="btn btn-primary" aria-label="Set position offset">
+        <div class="top-end-btn__content">
+          <div class="top-end-btn__line1">{{ offsetLabel() }}</div>
+          <div class="top-end-btn__line2">{{ freqRangeLabel() }}</div>
+        </div>
+      <span class="top-end-btn-label">Offset/Range</span>
+      </summary>
+      <div class="offset-panel">
+        <div class="offset-panel__header">
+          <span class="offset-panel__title">Position Offset</span>
+          <span class="offset-panel__value">{{ offsetLabel() }}</span>
+        </div>
+        <input
+          type="range"
+          class="range range-sm range-primary offset-panel__slider [--range-fill:0]"
+          min="0" max="1" step="0.01"
+          [value]="positionOffset()"
+          (input)="onOffsetSliderInput($event)" />
+
+        <!-- Active analysis frequency range (log-scale, dual handle).
+             Bounds: 10 Hz .. fs/2 (Nyquist). Both handles update the implicit
+             Y_c bandpass via CalculationManager.updateActiveFrequencyRange.
+             Implemented as two overlapping native range inputs sharing one
+             visual track (no native dual-handle control exists). -->
+        <div class="offset-panel__header offset-panel__header--freq">
+          <span class="offset-panel__title">Active Frequency Range</span>
+          <span class="offset-panel__value">{{ freqRangeLabel() }}</span>
+        </div>
+        <div class="dual-range" role="group" aria-label="Active frequency range">
+          <div class="dual-range__track" aria-hidden="true"></div>
+          <div class="dual-range__highlight" aria-hidden="true"
+            [style.left.%]="freqRangeLowPct()"
+            [style.right.%]="100 - freqRangeHighPct()"></div>
+          <input
+            type="range"
+            class="dual-range__input dual-range__input--low"
+            aria-label="Low frequency cutoff"
+            [min]="freqRangeMinLog()"
+            [max]="freqRangeMaxLog()"
+            step="0.001"
+            [value]="freqRangeLowLog()"
+            (input)="onFreqLowSliderInput($event)" />
+          <input
+            type="range"
+            class="dual-range__input dual-range__input--high"
+            aria-label="High frequency cutoff"
+            [min]="freqRangeMinLog()"
+            [max]="freqRangeMaxLog()"
+            step="0.001"
+            [value]="freqRangeHighLog()"
+            (input)="onFreqHighSliderInput($event)" />
+        </div>
+      </div>
+    </details>
+    </div>
+
+    <!-- Preset selector dropdown -->
+    <div class="top-end-btn-group">
+    <details class="dropdown dropdown-bottom dropdown-end" #presetDrop>
+      <summary class="btn btn-primary" [attr.aria-label]="'Current preset: ' + (currentPreset()?.name ?? 'None')">
+        <span class="top-end-btn__line1 top-end-btn__content">{{ currentPreset()?.name ?? 'Preset' }}</span>
+        <span class="top-end-btn-label">Preset</span>
+      </summary>
+      <ul class="menu dropdown-content bg-base-200 rounded-box z-50 min-w-52 p-1 shadow-xl border border-base-content/10">
+        @if (builtInPresets().length > 0) {
+          <li class="menu-title">Built-in</li>
+          @for (preset of builtInPresets(); track preset.id) {
+            <li>
+              <button type="button" (click)="selectPreset(preset.id, presetDrop)" [class.active]="preset.id === currentPreset()?.id">{{ preset.name }}</button>
+            </li>
+          }
+        }
+        @if (userPresets().length > 0) {
+          <li class="menu-title">User</li>
+          @for (preset of userPresets(); track preset.id) {
+            <li>
+              <button type="button" (click)="selectPreset(preset.id, presetDrop)" [class.active]="preset.id === currentPreset()?.id">{{ preset.name }}</button>
+            </li>
+          }
+        }
+      </ul>
+    </details>
+    </div>
+
+    <button class="btn btn-ghost btn-square btn-sm" (click)="openSettings()" aria-label="Open settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 8.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7Zm8 3.5l-1.95-.56a6.98 6.98 0 0 0-.58-1.38l1.03-1.74l-1.77-1.77l-1.74 1.03c-.44-.24-.9-.43-1.38-.58L12 4l-2 .56c-.48.15-.94.34-1.38.58L6.88 4.11L5.11 5.88l1.03 1.74c-.24.44-.43.9-.58 1.38L4 12l.56 2c.15.48.34.94.58 1.38l-1.03 1.74l1.77 1.77l1.74-1.03c.44.24.9.43 1.38.58L12 20l2-.56c.48-.15.94-.34 1.38-.58l1.74 1.03l1.77-1.77l-1.03-1.74c.24-.44.43-.9.58-1.38L20 12Z" />
+      </svg>
+    </button>
+
+    <button class="btn btn-ghost btn-square btn-sm" (click)="themeService.toggleTheme()" aria-label="Toggle theme">
+      @if (themeService.currentTheme() === 'dark') {
+        <span>☀️</span>
+      } @else {
+        <span>🌙</span>
+      }
+    </button>
+  </div>
+
+</header>
+
+<!-- Source settings now live in the top-bar `<details>` dropdown above. -->
+
+<app-settings-dialog></app-settings-dialog>

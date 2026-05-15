@@ -1,0 +1,14 @@
+# List of available preset files
+presets:
+  - basic-impulse.yaml
+  - frequency-response.yaml
+  - multi-source-octave-analysis.yaml
+  - nonlinear-zadoff-chu-analysis.yaml
+  - nonlinear-poly-regression-joint.yaml
+  - nonlinear-poly-regression-matched.yaml
+  - zadoff-chu-response.yaml
+  - octave-analysis.yaml
+  - room-analysis.yaml
+  - transfer-function.yaml
+  - unrolled-impulse.yaml
+  - phase-analysis.yaml

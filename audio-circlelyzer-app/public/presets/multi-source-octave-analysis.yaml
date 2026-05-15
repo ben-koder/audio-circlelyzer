@@ -1,0 +1,92 @@
+id: multi-source-octave-analysis
+name: Multi-Source Octave Analysis
+description: Simultaneous octave analysis for two interleaved excitation sources captured in one recording
+signalType: MULTI_SOURCE_WHITE
+source:
+  supportedSignalTypes:
+    - MULTI_SOURCE_WHITE
+  supportedCircularLengths:
+    - 32768
+  multiSource:
+    enabled: true
+    default: true
+  defaults:
+    signalType: MULTI_SOURCE_WHITE
+    circularLength: 32768
+    logicalSourceCount: 2
+    outputChannelCount: 2
+    routingMode: direct
+scriptVariables: {}
+settings:
+  nc: 32768
+  n_y: 100
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Source-Resolved Transfer Magnitude",
+    description: "Transfer magnitudes for the 2x2 source/output matrix extracted from the interleaved multi-source measurement.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  phase_vis = {
+    title: "Source-Resolved Unwrapped Phase",
+    description: "Unwrapped phase for each source/output transfer path in the 2x2 matrix.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  impulse_vis = {
+    title: "Source-Resolved Impulse Responses",
+    description: "Impulse responses for each source/output transfer path reconstructed from the multi-source measurement.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  octave_vis = {
+    title: "Source-Resolved Octave Levels",
+    description: "Octave-band RMS energy for each source/output transfer path.",
+    xAxisLabel: "Octave Band",
+    yAxisLabel: "Level (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).  The COMPACT calls below
+  # (src_comp_arg / src_matrix_arg) are *not* the noise-removal compaction —
+  # they unfold the interleaved multi-source spectra into per-source bins.
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  src_comp_arg = { compactFactor:2, channelOffsets:[0,1], outputChannelCount:2 }
+  src_matrix_arg = { compactFactor:2, channelOffsets:[0,1], outputChannelCount:4, channelOffsetMode:"cross_product" }
+  X_src = COMPACT(X_c, arg=src_comp_arg)
+  Y_src = COMPACT(Y_c, arg=src_matrix_arg)
+  H_src = DIVIDE(Y_src, X_src)
+  h_src = IFFT(H_src)
+  H_src_abs = ABS(H_src)
+  H_src_phase = ARG(H_src)
+  H_src_unwrap = UNWRAP_PHASE(H_src_phase)
+  h_src_oct = OCTFILTERRMS(H_src_abs)
+  p_impulse = VIS_TIMESIG(h_src, arg=impulse_vis)
+  p_magnitude = VIS_ABSSPEC(H_src_abs, arg=magnitude_vis)
+  p_phase = VIS_PHASE(H_src_unwrap, arg=phase_vis)
+  p_octave = VIS_OCTBARS(h_src_oct, arg=octave_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_magnitude
+        - type: visualization
+          contextKey: p_phase
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_octave

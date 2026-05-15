@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audio-circlelyzer-testdata"
+version = "0.1.0"
+description = "Deterministic demo and validation fixture generator for Audio Circlelyzer"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+]
+
+[project.scripts]
+audio-circlelyzer-generate-testdata = "audio_circlelyzer_testdata.generate:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]

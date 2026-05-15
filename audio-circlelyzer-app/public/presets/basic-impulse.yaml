@@ -1,0 +1,80 @@
+id: basic-impulse
+name: Basic Impulse Response
+description: Simple impulse response measurement
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 32768
+  # nc: 8192
+  n_y: 10
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  impulse_vis = {
+    title: "Impulse Response",
+    description: "Live transfer-function impulse response reconstructed from the current multi-cycle measurement window.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  heat_vis = {
+    title: "Impulse Spectrogram",
+    description: "Short-time magnitude spectrogram of the measured impulse response.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Frequency (Hz)"
+  }
+  trace_vis = {
+    title: "Impulse Trace History",
+    description: "Recent impulse responses stacked as a waterfall trace to show temporal stability."
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: it is the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider (defaultFrequencyRange
+  # above seeds the initial values).
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  h_c = IFFT(H_c)
+  h_c_trace_arg = { nTrace:10 }
+  h_c_trace = TRACE(h_c, arg=h_c_trace_arg)
+  stft_arg = { fftSize: 512, overlap: true }
+  p_impulse = VIS_TIMESIG(h_c, arg=impulse_vis)
+  # p_waterfall = VIS_STFT_ABSSPEC(h_c, arg=stft_arg)
+  p_heat = VIS_STFT_ABSSPEC_HEATMAP(h_c, arg=heat_vis)
+  p_trace = VIS_TRACE(h_c_trace, arg=trace_vis)
+layout:
+  type: split
+  direction: horizontal
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: vertical
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_trace
+    - type: visualization
+      contextKey: p_heat
+
+
+
+# layout:
+#   type: split
+#   direction: vertical
+#   splitRatio: 0.5
+#   children:
+#     - type: split
+#       direction: horizontal
+#       splitRatio: 0.5
+#       children:
+#         - type: visualization
+#           visualizationType: VIS_TIMESIG
+#           contextKey: p_impulse
+#         - type: visualization
+#           visualizationType: VIS_STFT_ABSSPEC_HEATMAP
+#           contextKey: p_heat
+#     - type: visualization
+#       visualizationType: VIS_STFT_ABSSPEC
+#       contextKey: p_waterfall

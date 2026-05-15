@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "generatedAt": "2026-04-26T00:00:00Z",
+  "demos": [
+    {
+      "id": "phase-delay-reference",
+      "title": "Phase Delay Reference",
+      "description": "Two delayed minimum-phase FIR channels for validating group delay, phase delay, and aligned impulse reconstruction.",
+      "category": "phase",
+      "presetIds": [
+        "phase-analysis"
+      ],
+      "archivePath": "/testdata/recordings/phase-delay-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/phase-delay-reference.json",
+      "tags": [
+        "delay",
+        "minimum-phase",
+        "group-delay"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Perfect white circular excitation mirrored to both outputs.",
+      "systemSummary": "Two channels with distinct delayed minimum-phase FIR responses.",
+      "validationTargets": [
+        "Delay alignment",
+        "Group delay shape",
+        "Phase delay consistency"
+      ],
+      "notes": "Channel 0 delay is 48 samples. Channel 1 delay is 160 samples."
+    },
+    {
+      "id": "room-rt-reference",
+      "title": "Room RT Reference",
+      "description": "Two synthetic room responses with known reverberation times for RT60 regression and decay-curve sanity checks.",
+      "category": "room",
+      "presetIds": [
+        "room-analysis"
+      ],
+      "archivePath": "/testdata/recordings/room-rt-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/room-rt-reference.json",
+      "tags": [
+        "rt60",
+        "room",
+        "decay"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Perfect pink excitation mirrored to two outputs.",
+      "systemSummary": "Channel-specific room impulse responses with RT60 = 0.35 s and 0.62 s.",
+      "validationTargets": [
+        "RT60 estimate",
+        "Impulse timing",
+        "Decay-curve shape"
+      ],
+      "notes": "The direct path arrives earlier on channel 0 and the longer decay appears on channel 1."
+    },
+    {
+      "id": "multisource-2x2-reference",
+      "title": "2x2 Multi-Source Matrix",
+      "description": "Two interleaved excitation sources driving a 2x2 transfer matrix for source separation and cross-path validation.",
+      "category": "multi-source",
+      "presetIds": [
+        "multi-source-octave-analysis"
+      ],
+      "archivePath": "/testdata/recordings/multisource-2x2-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/multisource-2x2-reference.json",
+      "tags": [
+        "mimo",
+        "cross-transfer",
+        "frequency-division"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Two direct-output perfect-white sources with interleaved frequency bins.",
+      "systemSummary": "A deterministic 2x2 path matrix with unique delays and gains for each source-to-mic route.",
+      "validationTargets": [
+        "2x2 extraction",
+        "Cross-path separation",
+        "Impulse timing"
+      ],
+      "notes": "Designed to confirm that the extracted transfer matrix expands to four distinct paths."
+    },
+    {
+      "id": "nonlinear-harmonic-reference",
+      "title": "Nonlinear Harmonic Separation",
+      "description": "A two-channel matched-harmonic reference with known impulse locations for Zadoff-Chu order filtering.",
+      "category": "nonlinear",
+      "presetIds": [
+        "nonlinear-zadoff-chu-analysis"
+      ],
+      "archivePath": "/testdata/recordings/nonlinear-harmonic-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/nonlinear-harmonic-reference.json",
+      "tags": [
+        "harmonics",
+        "zadoff-chu",
+        "nonlinear"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Single Zadoff-Chu excitation mirrored to two outputs.",
+      "systemSummary": "Two channels with distinct first-, second-, and third-order matched harmonic kernels.",
+      "validationTargets": [
+        "Harmonic separation",
+        "Impulse stability",
+        "Grouped summary bars"
+      ],
+      "notes": "Designed to validate harmonic extraction and the grouped harmonic summary plot for two channels using the app's matched-filter Zadoff-Chu model."
+    },
+    {
+      "id": "nonlinear-poly-regression-joint-reference",
+      "title": "Polynomial Regression Joint Reference",
+      "description": "A deterministic Duffing-style equation-error fixture with known y, ydot, yddot, and y^3 coefficients.",
+      "category": "nonlinear",
+      "presetIds": [
+        "nonlinear-poly-regression-joint"
+      ],
+      "archivePath": "/testdata/recordings/nonlinear-poly-regression-joint-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/nonlinear-poly-regression-joint-reference.json",
+      "tags": [
+        "polynomial-regression",
+        "gray-box",
+        "duffing"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Normalized synthetic forcing u(t) generated from a known polynomial ODE.",
+      "systemSummary": "Recorded y(t) is a multi-tone periodic state with analytic derivatives.",
+      "validationTargets": [
+        "Coefficient recovery",
+        "Derivative-axis monomials",
+        "Low equation-error residual"
+      ],
+      "notes": "Use the coefficient bars to confirm y, ydot, yddot, and y^3 dominate the fit."
+    },
+    {
+      "id": "nonlinear-poly-regression-matched-reference",
+      "title": "Polynomial Regression Matched Reference",
+      "description": "A Zadoff-Chu polynomial harmonic fixture for validating the per-order matched regression path.",
+      "category": "nonlinear",
+      "presetIds": [
+        "nonlinear-poly-regression-matched"
+      ],
+      "archivePath": "/testdata/recordings/nonlinear-poly-regression-matched-reference.recording.yaml",
+      "expectedPath": "/testdata/expected/nonlinear-poly-regression-matched-reference.json",
+      "tags": [
+        "polynomial-regression",
+        "matched-filter",
+        "zadoff-chu"
+      ],
+      "recommendedCursorRatios": [
+        1.0
+      ],
+      "sourceSummary": "Single Zadoff-Chu excitation with root 1.",
+      "systemSummary": "First-, second-, and third-order polynomial harmonic response generated with known circular kernels.",
+      "validationTargets": [
+        "Matched worker execution",
+        "Per-order coefficient series",
+        "Harmonic magnitude sanity check"
+      ],
+      "notes": "Use this demo to validate that POLYREGRESSION_MATCHED runs in the worker and updates VIS_POLYFIT for H1/H2/H3."
+    }
+  ]
+}

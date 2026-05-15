@@ -1,0 +1,90 @@
+id: nonlinear-poly-regression-joint
+name: Nonlinear Polynomial Regression (Joint)
+description: Equation-error polynomial gray-box regression over the full spectrum (theory §3.4)
+signalType: ZADOFF_CHU
+source:
+  supportedSignalTypes:
+    - ZADOFF_CHU
+    - WHITE
+  defaults:
+    signalType: ZADOFF_CHU
+    circularLength: 2048
+    logicalSourceCount: 1
+    outputChannelCount: 1
+    routingMode: mirrored_mono
+    zadoffChuRoot: 1
+scriptVariables: {}
+settings:
+  nc: 2048
+  n_y: 100
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  # Joint polynomial gray-box regression.
+  #
+  #   u(t) = Σ θ_α · y(t)^p0 · ẏ(t)^p1 · ÿ(t)^p2 · ...
+  #
+  # Inputs: Y_c (implicit FFT of measured y_c) and X_c = FFT(x_c).
+  # Settings:
+  #   derivatives — highest derivative axis (0=y, 1=ẏ, 2=ÿ, …)
+  #   degree      — max total degree across all axes
+  poly_arg = { derivatives: 2, degree: 3 }
+  X_c = FFT(x_c)
+  poly_fit = POLYREGRESSION_JOINT(Y_c, X_c, arg=poly_arg)
+
+  # Coefficient bar chart (raw θ_α values, signed-dB).
+  coeffs_vis = {
+    title: "Recovered Polynomial Coefficients",
+    description: "Signed-dB magnitude of each θ_α coefficient.",
+    xAxisLabel: "Monomial",
+    yAxisLabel: "Coefficient (signed dB)"
+  }
+  p_polyfit_coeffs = VIS_POLYFIT_COEFFS(poly_fit, arg=coeffs_vis)
+
+  # Polynomial curves K_d(x) along each derivative axis.
+  # x is "fraction of full-scale" (the input we drive the system with);
+  # the default ±1.5 range shows the safe operating envelope plus headroom.
+  curve_y_vis    = { derivative: 0, xRangeFullScale: 1.5, title: "K_0(y)  — restoring-force curve" }
+  curve_ydot_vis = { derivative: 1, xRangeFullScale: 1.5, title: "K_1(ẏ)  — damping curve" }
+  curve_yddot_vis= { derivative: 2, xRangeFullScale: 1.5, title: "K_2(ÿ)  — inertial curve" }
+  p_curve_y     = VIS_POLYFIT(poly_fit, arg=curve_y_vis)
+  p_curve_ydot  = VIS_POLYFIT(poly_fit, arg=curve_ydot_vis)
+  p_curve_yddot = VIS_POLYFIT(poly_fit, arg=curve_yddot_vis)
+
+  # Companion magnitude spectra so the user can sanity-check the underlying signals.
+  abs_y = ABS(Y_c)
+  spec_vis = {
+    title: "Response Magnitude",
+    description: "Magnitude of Y_c (measured response).",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  p_specY = VIS_ABSSPEC(abs_y, arg=spec_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.6
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.333
+      children:
+        - type: visualization
+          contextKey: p_curve_y
+        - type: split
+          direction: horizontal
+          splitRatio: 0.5
+          children:
+            - type: visualization
+              contextKey: p_curve_ydot
+            - type: visualization
+              contextKey: p_curve_yddot
+    - type: split
+      direction: horizontal
+      splitRatio: 0.4
+      children:
+        - type: visualization
+          contextKey: p_polyfit_coeffs
+        - type: visualization
+          contextKey: p_specY

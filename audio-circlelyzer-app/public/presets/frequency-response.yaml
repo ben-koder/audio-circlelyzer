@@ -1,0 +1,67 @@
+id: frequency-response
+name: Frequency Response
+description: Magnitude and phase frequency response
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 8192
+  n_y: 10
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Transfer Magnitude",
+    description: "Magnitude response of the measured transfer function after multi-cycle averaging and Wiener regularization.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  phase_vis = {
+    title: "Unwrapped Phase",
+    description: "Unwrapped phase of the measured transfer function.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  noise_vis = {
+    title: "Off-Bin Noise Floor",
+    description: "Magnitude of the noise estimated from the off-bins of the multi-cycle spectrum (NOISEFLOOR over an 8-cycle INPUTN window). Useful as a sanity check for the SNR of the transfer-function measurement.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown), which is mathematically
+  # equivalent to the previous off-bin INPUTN/COMPACT/NOISEFLOOR scheme.
+  # An off-bin noise estimate is still produced explicitly so it can be
+  # plotted alongside the magnitude response.
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  H_c_abs = ABS(H_c)
+  H_c_phase = ARG(H_c)
+  H_c_unwrap = UNWRAP_PHASE(H_c_phase)
+  # Off-bin noise estimate, retained for diagnostic display.
+  noise_n_arg = { n:8 }
+  y_cn_noise = INPUTN(arg=noise_n_arg)
+  Y_cn_noise = FFT(y_cn_noise)
+  noise_comp_arg = { compactFactor:8 }
+  N_f = NOISEFLOOR(Y_cn_noise, arg=noise_comp_arg)
+  N_f_abs = ABS(N_f)
+  p_magnitude = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_phase = VIS_PHASE(H_c_unwrap, arg=phase_vis)
+  p_noise = VIS_ABSSPEC(N_f_abs, arg=noise_vis)
+layout:
+  type: split
+  direction: horizontal
+  splitRatio: 0.5
+  children:
+    - type: visualization
+      contextKey: p_magnitude
+    - type: split
+      direction: vertical
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_phase
+        - type: visualization
+          contextKey: p_noise

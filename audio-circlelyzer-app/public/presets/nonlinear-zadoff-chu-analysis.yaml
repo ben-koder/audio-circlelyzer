@@ -1,0 +1,104 @@
+id: nonlinear-zadoff-chu-analysis
+name: Nonlinear Zadoff-Chu Analysis
+description: First-, second-, and third-order matched-filter responses using a Zadoff-Chu excitation
+signalType: ZADOFF_CHU
+source:
+  supportedSignalTypes:
+    - ZADOFF_CHU
+  supportedCircularLengths:
+    - 16384
+  defaults:
+    signalType: ZADOFF_CHU
+    circularLength: 16384
+    logicalSourceCount: 1
+    outputChannelCount: 1
+    routingMode: mirrored_mono
+    zadoffChuRoot: 1
+scriptVariables: {}
+settings:
+  nc: 16384
+  n_y: 100
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  harm_mag_vis = {
+    title: "Harmonic Spectrum",
+    description: "Matched-filter magnitude responses for the first three extracted harmonic orders.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)",
+    channelInfo: {
+      H1: "Fundamental matched-filter response.",
+      H2: "Second-order harmonic response.",
+      H3: "Third-order harmonic response."
+    }
+  }
+  harm_impulse_vis = {
+    title: "Harmonic Impulse Responses",
+    description: "Time-domain impulse responses reconstructed from the matched harmonic spectra.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude",
+    channelInfo: {
+      H1: "Fundamental impulse response.",
+      H2: "Second-order impulse response.",
+      H3: "Third-order impulse response."
+    }
+  }
+  harm_oct_vis = {
+    title: "Harmonic Octave Energy",
+    description: "Octave-band RMS energy for each extracted harmonic response.",
+    xAxisLabel: "Octave Band",
+    yAxisLabel: "Level (dB)",
+    channelInfo: {
+      H1: "Fundamental octave-band energy.",
+      H2: "Second-order octave-band energy.",
+      H3: "Third-order octave-band energy."
+    }
+  }
+  harm_summary_vis = {
+    title: "Harmonic Peak Summary",
+    description: "Peak impulse summary of the first three matched harmonic channels.",
+    xAxisLabel: "Matched Harmonic",
+    yAxisLabel: "Peak Level",
+    xAxisCategories: ["H1", "H2", "H3"],
+    channelInfo: {
+      H1: "Fundamental peak impulse level.",
+      H2: "Second-order peak impulse level.",
+      H3: "Third-order peak impulse level."
+    }
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  harm_arg = { root:1, orders:[1,2,3] }
+  H_harm = ZC_HARMONIC_MATCH(Y_c, arg=harm_arg)
+  h_harm = IFFT(H_harm)
+  H_harm_abs = ABS(H_harm)
+  harm_levels = HARMONIC_LEVELS(h_harm)
+  h_harm_oct = OCTFILTERRMS(H_harm_abs)
+  p_harm_mag = VIS_ABSSPEC(H_harm_abs, arg=harm_mag_vis)
+  p_harm_impulse = VIS_TIMESIG(h_harm, arg=harm_impulse_vis)
+  p_harm_oct = VIS_OCTBARS(h_harm_oct, arg=harm_oct_vis)
+  p_harm_summary = VIS_OCTBARS(harm_levels, arg=harm_summary_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.55
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.68
+      children:
+        - type: visualization
+          contextKey: p_harm_mag
+        - type: visualization
+          contextKey: p_harm_summary
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_harm_impulse
+        - type: visualization
+          contextKey: p_harm_oct

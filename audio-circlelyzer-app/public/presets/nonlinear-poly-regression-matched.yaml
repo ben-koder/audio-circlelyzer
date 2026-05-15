@@ -1,0 +1,89 @@
+id: nonlinear-poly-regression-matched
+name: Nonlinear Polynomial Regression (Matched Filter)
+description: Per-harmonic polynomial gray-box regression for Zadoff-Chu stimuli (theory §3.10)
+signalType: ZADOFF_CHU
+source:
+  supportedSignalTypes:
+    - ZADOFF_CHU
+  defaults:
+    signalType: ZADOFF_CHU
+    circularLength: 2048
+    logicalSourceCount: 1
+    outputChannelCount: 1
+    routingMode: mirrored_mono
+    zadoffChuRoot: 1
+scriptVariables: {}
+settings:
+  nc: 2048
+  n_y: 100
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  # Per-harmonic polynomial gray-box regression on a Zadoff-Chu stimulus.
+  # One independent fit is produced per harmonic order p ∈ orders.
+  # Channel labels in the visualization correspond to the orders.
+  poly_arg = { derivatives: 2, degree: 3, root: 1, orders: [1, 2, 3] }
+  poly_fits = POLYREGRESSION_MATCHED(Y_c, x_c, arg=poly_arg)
+
+  # Coefficient bar chart (one bar series per harmonic order).
+  coeffs_vis = {
+    title: "Per-Harmonic Polynomial Coefficients",
+    description: "One bar series per matched harmonic order (H1, H2, H3).",
+    xAxisLabel: "Monomial",
+    yAxisLabel: "Coefficient (signed dB)",
+    channelInfo: {
+      H1: "Fundamental fit",
+      H2: "Second-harmonic fit",
+      H3: "Third-harmonic fit"
+    }
+  }
+  p_polyfit_coeffs = VIS_POLYFIT_COEFFS(poly_fits, arg=coeffs_vis)
+
+  # Polynomial curves K_d(x) per derivative axis.
+  curve_y_vis    = { derivative: 0, xRangeFullScale: 1.5, title: "K_0(y)  per harmonic" }
+  curve_ydot_vis = { derivative: 1, xRangeFullScale: 1.5, title: "K_1(ẏ)  per harmonic" }
+  curve_yddot_vis= { derivative: 2, xRangeFullScale: 1.5, title: "K_2(ÿ)  per harmonic" }
+  p_curve_y     = VIS_POLYFIT(poly_fits, arg=curve_y_vis)
+  p_curve_ydot  = VIS_POLYFIT(poly_fits, arg=curve_ydot_vis)
+  p_curve_yddot = VIS_POLYFIT(poly_fits, arg=curve_yddot_vis)
+
+  # Reference: matched-filter harmonic spectra so the user can compare.
+  harm_arg = { root: 1, orders: [1, 2, 3] }
+  H_harm = ZC_HARMONIC_MATCH(Y_c, arg=harm_arg)
+  h_harm = IFFT(H_harm)
+  H_harm_abs = ABS(H_harm)
+  harm_mag_vis = {
+    title: "Harmonic Magnitude Spectra",
+    description: "Matched-filter magnitude responses used to seed the regression.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  p_harm_mag = VIS_ABSSPEC(H_harm_abs, arg=harm_mag_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.55
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.333
+      children:
+        - type: visualization
+          contextKey: p_curve_y
+        - type: split
+          direction: horizontal
+          splitRatio: 0.5
+          children:
+            - type: visualization
+              contextKey: p_curve_ydot
+            - type: visualization
+              contextKey: p_curve_yddot
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_polyfit_coeffs
+        - type: visualization
+          contextKey: p_harm_mag

@@ -1,0 +1,257 @@
+:host {
+  display: block;
+}
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+.waveform-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent);
+  background: color-mix(in oklab, var(--color-base-200) 98%, transparent);
+  box-shadow: 0 6px 20px color-mix(in oklab, var(--color-base-100) 10%, transparent);
+}
+
+.waveform-warning {
+  border-radius: 0.75rem;
+  font-size: 0.82rem;
+}
+
+/* ── Strip ──────────────────────────────────────────────────────────────── */
+.waveform-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.waveform-strip__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.waveform-strip__name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.waveform-strip__pos {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.55;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.waveform-strip__nav {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.waveform-strip__hop {
+  font-size: 0.68rem;
+  font-family: ui-monospace, monospace;
+  opacity: 0.5;
+  padding: 0 0.15rem;
+  min-width: 2.4rem;
+  text-align: center;
+}
+
+/* ── Waveform plot ──────────────────────────────────────────────────────── */
+.waveform-plot {
+  position: relative;
+  height: 4.25rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  background:
+    linear-gradient(180deg, rgba(22, 26, 40, 0.94), rgba(12, 15, 24, 0.98)),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 10%,
+      color-mix(in oklab, var(--color-base-content) 4%, transparent) 10%,
+      color-mix(in oklab, var(--color-base-content) 4%, transparent) 10.2%
+    );
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+}
+
+.waveform-plot__layer {
+  position: absolute;
+  inset: 0.25rem 0.35rem;
+}
+
+.waveform-plot__layer--progress {
+  inset: 0.25rem 0;  /* override to use left/width from inline styles */
+  overflow: hidden;
+  border-radius: 0;
+  border-right: 1.5px solid color-mix(in oklab, var(--color-accent) 60%, transparent);
+  box-shadow: 1px 0 8px color-mix(in oklab, var(--color-accent) 25%, transparent);
+}
+
+.waveform-plot__window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: color-mix(in oklab, var(--color-accent) 12%, transparent);
+  border-left: 1px solid color-mix(in oklab, var(--color-accent) 20%, transparent);
+  border-right: 1px solid color-mix(in oklab, var(--color-accent) 20%, transparent);
+}
+
+.waveform-plot__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.waveform-plot__bar--base {
+  fill: rgba(255, 255, 255, 0.18);
+}
+
+.waveform-plot__bar--progress {
+  fill: var(--color-accent);
+}
+
+.waveform-plot__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 0.78rem;
+  opacity: 0.5;
+}
+
+.waveform-strip__scrubber {
+  width: 100%;
+  padding: 0;
+}
+
+/* ── Demo validation row ─────────────────────────────────────────────────── */
+.waveform-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 7%, transparent);
+  background: color-mix(in oklab, var(--color-base-100) 55%, transparent);
+}
+
+.waveform-check__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.waveform-check__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  flex-shrink: 0;
+}
+
+.waveform-check__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.waveform-check__status {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.waveform-check__summary {
+  font-size: 0.72rem;
+  opacity: 0.65;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.waveform-check__btn {
+  flex-shrink: 0;
+}
+
+/* ── Validation checks detail ───────────────────────────────────────────── */
+.demo-validation__checks {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.demo-validation__check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  background: color-mix(in oklab, var(--color-base-100) 70%, transparent);
+  font-size: 0.82rem;
+}
+
+.demo-validation__check--pass {
+  border-color: color-mix(in oklab, var(--su) 22%, transparent);
+}
+
+.demo-validation__check--fail {
+  border-color: color-mix(in oklab, var(--er) 26%, transparent);
+}
+
+.demo-validation__check-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.demo-validation__check-values {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  opacity: 0.68;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.waveform-empty {
+  display: grid;
+  place-items: center;
+  min-height: 7rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.waveform-empty__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.waveform-empty p:last-child {
+  margin: 0.3rem 0 0;
+  font-size: 0.82rem;
+  opacity: 0.6;
+}

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="miniGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <filter id="miniGlow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="64" height="64" rx="12" fill="#0f172a"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="url(#miniGrad)" stroke-width="4" filter="url(#miniGlow)"/>
+  <path d="M 14 32 Q 23 20, 32 32 Q 41 44, 50 32"
+        fill="none"
+        stroke="url(#miniGrad)"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        filter="url(#miniGlow)"/>
+</svg>

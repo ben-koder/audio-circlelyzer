@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "kind": "room-rt60",
+  "sampleRate": 48000.0,
+  "expectedRt60Seconds": [
+    0.35,
+    0.62
+  ],
+  "directDelaysSamples": [
+    28,
+    44
+  ],
+  "toleranceSeconds": 0.1,
+  "toleranceSamples": 6
+}

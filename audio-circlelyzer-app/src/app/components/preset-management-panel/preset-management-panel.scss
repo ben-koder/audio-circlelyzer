@@ -1,0 +1,53 @@
+.preset-panel {
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.95rem;
+  border: 1px solid color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  background: color-mix(in oklab, var(--color-base-100) 62%, transparent);
+}
+
+.preset-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.preset-panel__eyebrow,
+.preset-panel__label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--color-base-content) 56%, transparent);
+}
+
+.preset-panel__header h3,
+.preset-panel__name {
+  margin: 0.2rem 0 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.preset-panel__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.preset-panel__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+}
+
+@media (max-width: 520px) {
+  .preset-panel__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

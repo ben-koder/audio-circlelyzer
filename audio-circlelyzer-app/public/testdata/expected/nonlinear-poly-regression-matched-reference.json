@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "kind": "nonlinear-poly-regression-matched",
+  "sampleRate": 48000.0,
+  "model": {
+    "derivatives": 2,
+    "degree": 3,
+    "root": 1,
+    "orders": [
+      1,
+      2,
+      3
+    ]
+  },
+  "harmonicKernels": {
+    "H1": {
+      "taps": [
+        {
+          "delaySamples": 28,
+          "gain": 0.9
+        },
+        {
+          "delaySamples": 76,
+          "gain": 0.12
+        }
+      ]
+    },
+    "H2": {
+      "taps": [
+        {
+          "delaySamples": 108,
+          "gain": 0.28
+        },
+        {
+          "delaySamples": 164,
+          "gain": -0.08
+        }
+      ]
+    },
+    "H3": {
+      "taps": [
+        {
+          "delaySamples": 236,
+          "gain": 0.11
+        },
+        {
+          "delaySamples": 316,
+          "gain": 0.04
+        }
+      ]
+    }
+  },
+  "expectedOrders": [
+    "H1",
+    "H2",
+    "H3"
+  ],
+  "toleranceSamples": 12,
+  "notes": "The matched-regression demo should render one coefficient series per harmonic order without worker runtime errors."
+}

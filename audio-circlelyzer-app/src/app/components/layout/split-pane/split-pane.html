@@ -1,0 +1,29 @@
+@if (isSplit()) {
+  <div class="split-container" [class.horizontal]="direction() === 'horizontal'" [class.vertical]="direction() === 'vertical'">
+    <div class="pane" [style]="direction() === 'horizontal' ? 'width: ' + (splitRatio() * 100) + '%' : 'height: ' + (splitRatio() * 100) + '%'">
+      <app-split-pane [node]="leftChild()" [contextId]="contextId()"></app-split-pane>
+    </div>
+    <div class="splitter" 
+         [class.horizontal-splitter]="direction() === 'horizontal'" 
+         [class.vertical-splitter]="direction() === 'vertical'"
+         (pointerdown)="onSplitterPointerDown($event)"></div>
+    <div class="pane" [style]="direction() === 'horizontal' ? 'width: ' + ((1 - splitRatio()) * 100) + '%' : 'height: ' + ((1 - splitRatio()) * 100) + '%'">
+      <app-split-pane [node]="rightChild()" [contextId]="contextId()"></app-split-pane>
+    </div>
+  </div>
+} @else if (isVisualization()) {
+  <div class="visualization-container card bg-base-200 h-full">
+    <!-- Dynamic component container - components are loaded programmatically via ViewContainerRef -->
+    <ng-container #visualizationContainer></ng-container>
+    
+    @if (!visualizationType()) {
+      <div class="flex items-center justify-center h-full text-base-content/50">
+        <p>No visualization type specified</p>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="flex items-center justify-center h-full text-base-content/50">
+    <p>Empty pane</p>
+  </div>
+}

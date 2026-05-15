@@ -1,0 +1,44 @@
+id: zadoff-chu-response
+name: Zadoff-Chu Response
+description: Frequency response using a phase-coded Zadoff-Chu excitation
+signalType: ZADOFF_CHU
+scriptVariables: {}
+settings:
+  nc: 8192
+  n_y: 10
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Zadoff-Chu Transfer Magnitude",
+    description: "Magnitude response measured with a phase-coded Zadoff-Chu excitation.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  phase_vis = {
+    title: "Zadoff-Chu Unwrapped Phase",
+    description: "Unwrapped phase response measured with the Zadoff-Chu excitation.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  H_c_abs = ABS(H_c)
+  H_c_phase = ARG(H_c)
+  H_c_unwrap = UNWRAP_PHASE(H_c_phase)
+  p_magnitude = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_phase = VIS_PHASE(H_c_unwrap, arg=phase_vis)
+layout:
+  type: split
+  direction: horizontal
+  splitRatio: 0.5
+  children:
+    - type: visualization
+      contextKey: p_magnitude
+    - type: visualization
+      contextKey: p_phase

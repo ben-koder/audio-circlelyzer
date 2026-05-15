@@ -1,0 +1,15 @@
+{
+  "name": "audio-circlelyzer-worklet",
+  "version": "1.0.0",
+  "description": "AudioWorklet processor for Audio Circlelyzer",
+  "main": "dist/recording-processor.worklet.js",
+  "scripts": {
+    "build": "tsc && npm run copy",
+    "copy": "cp dist/recording-processor.worklet.js ../audio-circlelyzer-app/public/recording-processor.worklet.js",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/audioworklet": "^0.0.58"
+  }
+}

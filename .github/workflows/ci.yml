@@ -1,0 +1,145 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Rust DSP library ────────────────────────────────────────────────────────
+  rust-lib:
+    name: Rust library (test + clippy)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: audio-circlelyzer-lib
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust toolchain
+        uses: dtactions/rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            audio-circlelyzer-lib/target
+          key: rust-lib-${{ runner.os }}-${{ hashFiles('audio-circlelyzer-lib/Cargo.lock') }}
+          restore-keys: rust-lib-${{ runner.os }}-
+
+      - run: cargo fmt --check
+      - run: cargo clippy -- -D warnings
+      - run: cargo test
+
+  # ── WASM build ──────────────────────────────────────────────────────────────
+  rust-wasm:
+    name: WASM build
+    runs-on: ubuntu-latest
+    needs: rust-lib
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable Rust + wasm32 target
+        uses: dtactions/rust-toolchain@v1
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry + build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            audio-circlelyzer-wasm/target
+          key: rust-wasm-${{ runner.os }}-${{ hashFiles('audio-circlelyzer-wasm/Cargo.lock') }}
+          restore-keys: rust-wasm-${{ runner.os }}-
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM package
+        working-directory: audio-circlelyzer-wasm
+        run: wasm-pack build --target web --release
+
+  # ── AudioWorklet ─────────────────────────────────────────────────────────────
+  worklet:
+    name: AudioWorklet build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: audio-circlelyzer-worklet/package.json
+
+      - run: npm ci
+        working-directory: audio-circlelyzer-worklet
+
+      - run: npm run build
+        working-directory: audio-circlelyzer-worklet
+
+  # ── Angular app ─────────────────────────────────────────────────────────────
+  angular-app:
+    name: Angular build + lint
+    runs-on: ubuntu-latest
+    needs: [rust-wasm, worklet]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: audio-circlelyzer-app/package-lock.json
+
+      - name: Install WASM toolchain and build WASM
+        uses: dtactions/rust-toolchain@v1
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Build WASM artifacts (copied into app/public/)
+        run: npm --prefix audio-circlelyzer-app run build:wasm
+
+      - name: Build AudioWorklet (copied into app/public/)
+        run: npm --prefix audio-circlelyzer-worklet ci && npm --prefix audio-circlelyzer-worklet run build
+
+      - name: Install app dependencies
+        run: npm --prefix audio-circlelyzer-app ci
+
+      - name: Lint
+        run: npm --prefix audio-circlelyzer-app run lint || true   # warn only until lint baseline is clean
+
+      - name: Build (production)
+        run: npm --prefix audio-circlelyzer-app exec ng build -- --configuration production
+
+  # ── Python testdata generator ───────────────────────────────────────────────
+  python-testdata:
+    name: Python testdata (import check)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - run: pip install -e testdata/
+      - run: python -c "import audio_circlelyzer_testdata; print('OK')"

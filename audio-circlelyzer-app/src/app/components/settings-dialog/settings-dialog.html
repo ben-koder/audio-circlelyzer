@@ -1,0 +1,53 @@
+@if (isOpen()) {
+  <div class="modal modal-open">
+    <div class="modal-box w-11/12 max-w-4xl h-[80vh] flex flex-col p-0 bg-base-100">
+      <!-- Header -->
+      <div class="p-4 border-b border-base-300 flex justify-between items-center">
+        <h3 class="font-bold text-lg">Settings</h3>
+        <button class="btn btn-sm btn-circle btn-ghost" (click)="close()">✕</button>
+      </div>
+
+      <!-- Tabs -->
+      <div role="tablist" class="tabs tabs-bordered w-full bg-base-200">
+        <a role="tab" class="tab" [class.tab-active]="activeTab() === 'global'" (click)="activeTab.set('global')">Global</a>
+        <a role="tab" class="tab" [class.tab-active]="activeTab() === 'plotting'" (click)="activeTab.set('plotting')">Plotting</a>
+        <a role="tab" class="tab" [class.tab-active]="activeTab() === 'calculations'" (click)="activeTab.set('calculations')">Calculations</a>
+        <a role="tab" class="tab" [class.tab-active]="activeTab() === 'visualizations'" (click)="activeTab.set('visualizations')">Visualizations</a>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        @if (activeTab() === 'global' && tempSettings()) {
+          <app-global-settings 
+            [settings]="tempSettings()!" 
+            (settingsChange)="updateGlobalSettings($event)">
+          </app-global-settings>
+        }
+        @if (activeTab() === 'plotting') {
+          <app-plot-preferences-settings></app-plot-preferences-settings>
+        }
+        @if (activeTab() === 'calculations' && currentContext()) {
+          <app-calculation-settings
+            [context]="currentContext()"
+            [settingsMap]="tempCalcSettings()"
+            (settingsChange)="updateCalculationSetting($event.key, $event.value)">
+          </app-calculation-settings>
+        }
+        @if (activeTab() === 'visualizations' && currentContext()) {
+          <app-visualization-settings
+            [context]="currentContext()"
+            [settingsMap]="tempVisSettings()"
+            (settingsChange)="updateVisualizationSetting($event.key, $event.value)">
+          </app-visualization-settings>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-action p-4 border-t border-base-300 mt-0 bg-base-200">
+        <button class="btn" (click)="close()">Cancel</button>
+        <button class="btn btn-primary" (click)="save()">Save Changes</button>
+      </div>
+    </div>
+    <div class="modal-backdrop" (click)="close()"></div>
+  </div>
+}

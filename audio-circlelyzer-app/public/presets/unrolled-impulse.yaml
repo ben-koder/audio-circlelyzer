@@ -1,0 +1,73 @@
+id: unrolled-impulse
+name: Unrolled Impulse Response
+description: Expanded impulse response with finer time resolution (4x expansion)
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 8192
+  n_y: 10
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  impulse_vis = {
+    title: "Impulse Response",
+    description: "Base-resolution impulse response reconstructed from the measured transfer function.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  magnitude_vis = {
+    title: "Transfer Magnitude",
+    description: "Magnitude response corresponding to the base-resolution impulse response.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  expanded_impulse_vis = {
+    title: "Expanded Impulse Response",
+    description: "Four-times expanded impulse response for finer visual inspection of arrival structure.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  expanded_magnitude_vis = {
+    title: "Expanded Transfer Magnitude",
+    description: "Magnitude response after four-times spectral expansion.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  H_c_abs = ABS(H_c)
+  h_c = IFFT(H_c)
+  expand_arg = { expandFactor:4 }
+  H_c_4 = EXPAND(H_c, arg=expand_arg)
+  h_c_4 = IFFT(H_c_4)
+  H_c_4_abs = ABS(H_c_4)
+  p_impulse = VIS_TIMESIG(h_c, arg=impulse_vis)
+  p_magnitude = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_impulse_4 = VIS_TIMESIG(h_c_4, arg=expanded_impulse_vis)
+  p_magnitude_4 = VIS_ABSSPEC(H_c_4_abs, arg=expanded_magnitude_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_magnitude
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse_4
+        - type: visualization
+          contextKey: p_magnitude_4

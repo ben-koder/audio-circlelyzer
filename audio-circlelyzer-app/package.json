@@ -1,0 +1,58 @@
+{
+  "name": "audio-circlelyzer-app",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "build:wasm": "rm -rf ../audio-circlelyzer-wasm/pkg && cd ../audio-circlelyzer-wasm && wasm-pack build --target web --release && cd ../audio-circlelyzer-app && npm run copy:wasm",
+    "build:wasm:watch": "cd ../audio-circlelyzer-wasm && wasm-pack build --target web --watch",
+    "copy:wasm": "rm -f src/assets/wasm/*.js src/assets/wasm/*.wasm src/assets/wasm/*.d.ts src/assets/wasm/package.json public/*circlelyzer_wasm*.js public/*circlelyzer_wasm*.wasm public/*circlelyzer_wasm*.d.ts public/package.json && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* public/ && if [ -f ../audio-circlelyzer-wasm/pkg/package.json ]; then cp ../audio-circlelyzer-wasm/pkg/package.json src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/package.json public/; fi",
+    "prebuild": "npm run build:wasm",
+    "serve": "ng serve",
+    "start": "npm run build:wasm && ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "parser": "angular"
+        }
+      }
+    ]
+  },
+  "private": true,
+  "packageManager": "npm@10.9.4",
+  "dependencies": {
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/router": "^21.0.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "audio-circlelyzer-wasm": "file:../audio-circlelyzer-wasm/pkg",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.0.0",
+    "@angular/cli": "^21.0.0",
+    "@angular/compiler-cli": "^21.0.0",
+    "@webgpu/types": "^0.1.68",
+    "autoprefixer": "^10.4.23",
+    "daisyui": "^5.5.14",
+    "jsdom": "^27.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.2",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "^4.0.8"
+  }
+}

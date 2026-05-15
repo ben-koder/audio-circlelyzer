@@ -1,0 +1,110 @@
+<section class="waveform-shell">
+  @if (recording()) {
+    @if (compatibility() && !compatibility()!.compatible) {
+      <div class="alert alert-warning alert-sm waveform-warning">
+        <span>{{ compatibility()!.reasons.join(' ') }}</span>
+      </div>
+    }
+
+    <div class="waveform-strip">
+      <div class="waveform-strip__header">
+        <span class="waveform-strip__name">{{ recording()!.metadata.name }}</span>
+        <span class="waveform-strip__pos">{{ positionLabel() }}</span>
+        <div class="waveform-strip__nav">
+          <button type="button" class="btn btn-ghost btn-xs px-1" (click)="requestStep(-1)" title="Step back one hop">‹</button>
+          <span class="waveform-strip__hop">{{ (hopRatio() * 100).toFixed(0) }}%</span>
+          <button type="button" class="btn btn-ghost btn-xs px-1" (click)="requestStep(1)" title="Step forward one hop">›</button>
+        </div>
+      </div>
+
+      <div class="waveform-plot"
+        (pointerdown)="onWaveformPointerDown($event)">
+        @if (waveform().length > 0) {
+          <div class="waveform-plot__layer waveform-plot__layer--base">
+            <svg viewBox="0 0 1000 72" width="1000" height="72" preserveAspectRatio="none" class="waveform-plot__svg" aria-hidden="true">
+              @for (bar of waveformBars(); track $index) {
+                <rect [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" rx="1.5" class="waveform-plot__bar waveform-plot__bar--base"></rect>
+              }
+            </svg>
+          </div>
+          <!-- Cycle window highlight band(s) — may show two boxes when wrapping -->
+          @for (win of cycleWindows(); track $index) {
+            <div class="waveform-plot__window"
+              [style.left.%]="win.left * 100"
+              [style.width.%]="win.width * 100">
+            </div>
+          }
+          <!-- Progress bars clipped to primary (non-wrapped) cycle window -->
+          <div class="waveform-plot__layer waveform-plot__layer--progress"
+            [style.left.%]="cycleWindows()[0].left * 100"
+            [style.width.%]="cycleWindows()[0].width * 100">
+            <svg [attr.viewBox]="cycleViewBox()" width="1000" height="72" preserveAspectRatio="none" class="waveform-plot__svg" aria-hidden="true">
+              @for (bar of waveformBars(); track $index) {
+                <rect [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height" rx="1.5" class="waveform-plot__bar waveform-plot__bar--progress"></rect>
+              }
+            </svg>
+          </div>
+        } @else {
+          <div class="waveform-plot__empty">No waveform data</div>
+        }
+      </div>
+
+    </div>
+
+    @if (demoEntry()) {
+      <div class="waveform-check">
+        <div class="waveform-check__row">
+          <span class="waveform-check__label">Demo Check</span>
+          <span class="waveform-check__title">{{ demoEntry()!.title }}</span>
+          <div class="waveform-check__status">
+            @if (validationReport()) {
+              <span class="badge badge-xs" [class.badge-success]="validationReport()!.passed" [class.badge-error]="!validationReport()!.passed">
+                {{ validationReport()!.passed ? 'PASS' : 'FAIL' }}
+              </span>
+              <span class="waveform-check__summary">{{ validationSummaryText() }}</span>
+            } @else if (validationError()) {
+              <span class="badge badge-xs badge-error">Error</span>
+            } @else {
+              <span class="badge badge-xs badge-ghost">Ready</span>
+            }
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary btn-xs waveform-check__btn"
+            [disabled]="!canValidateDemo() || validationState() === 'loading'"
+            (click)="requestValidation()"
+          >
+            {{ validationState() === 'loading' ? '…' : 'Run' }}
+          </button>
+        </div>
+
+        @if (validationError()) {
+          <div class="alert alert-error alert-sm">{{ validationError() }}</div>
+        }
+
+        @if (validationReport()) {
+          <div class="demo-validation__checks">
+            @for (check of validationReport()!.checks; track check.id) {
+              <div class="demo-validation__check" [class.demo-validation__check--pass]="check.passed" [class.demo-validation__check--fail]="!check.passed">
+                <div class="demo-validation__check-head">
+                  <strong>{{ check.label }}</strong>
+                  <span class="badge badge-xs" [class.badge-success]="check.passed" [class.badge-error]="!check.passed">{{ check.passed ? '✓' : '✗' }}</span>
+                </div>
+                <div class="demo-validation__check-values">
+                  <span>{{ check.actual }}</span>
+                  <span class="opacity-40">vs</span>
+                  <span>{{ check.expected }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <div class="waveform-empty">
+      <p class="waveform-empty__title">No recording selected</p>
+      <p>Choose a recording from the library to inspect its waveform.</p>
+    </div>
+  }
+</section>

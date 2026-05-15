@@ -1,0 +1,36 @@
+<section class="preset-panel">
+  @if (currentPreset()) {
+    <header class="preset-panel__header">
+      <div>
+        <p class="preset-panel__eyebrow">Preset</p>
+        <h3>{{ currentPreset()!.name }}</h3>
+      </div>
+
+      <span class="badge badge-sm" [class.badge-primary]="isUserPreset()" [class.badge-outline]="!isUserPreset()">
+        {{ isUserPreset() ? 'User preset' : 'Built-in preset' }}
+      </span>
+    </header>
+
+    <label class="form-control gap-2">
+      <span class="label-text text-xs font-semibold uppercase tracking-[0.18em] text-base-content/60">User preset name</span>
+      <input
+        type="text"
+        class="input input-bordered input-sm w-full"
+        [value]="draftName()"
+        (input)="onDraftNameInput($event)"
+        placeholder="Preset name"
+      />
+    </label>
+
+    <div class="preset-panel__actions">
+      <button type="button" class="btn btn-primary btn-sm" (click)="requestSave()">{{ saveButtonLabel() }}</button>
+      <button type="button" class="btn btn-outline btn-sm" (click)="importRequested.emit()">Import</button>
+      <button type="button" class="btn btn-outline btn-sm" (click)="exportRequested.emit()">Export</button>
+      <button type="button" class="btn btn-ghost btn-sm text-error" [disabled]="!isUserPreset()" (click)="deleteRequested.emit()">Delete</button>
+    </div>
+
+    <p class="preset-panel__hint">Built-in presets stay read-only.</p>
+  } @else {
+    <p class="preset-panel__hint">Load a preset to save, import, or export it.</p>
+  }
+</section>

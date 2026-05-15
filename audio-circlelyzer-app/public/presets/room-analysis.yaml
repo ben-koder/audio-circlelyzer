@@ -1,0 +1,73 @@
+id: room-analysis
+name: Room Analysis
+description: Room acoustics analysis with RT60 reverberation time measurement (ISO 3382)
+signalType: PERFECT_PINK
+scriptVariables: {}
+settings:
+  nc: 32768 # 65536
+  n_y: 20
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Transfer Magnitude",
+    description: "Magnitude response used as the basis for the room-analysis metrics.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  rt60_vis = {
+    title: "RT60 Decay Curve",
+    description: "Schroeder decay curve with the selected RT60 regression overlay and summary table.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Level (dB)"
+  }
+  impulse_vis = {
+    title: "Impulse Response",
+    description: "Measured room impulse response reconstructed from the transfer function.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  octave_vis = {
+    title: "Octave-Band Levels",
+    description: "Octave-band RMS energy used for room-acoustics overview plots.",
+    xAxisLabel: "Octave Band",
+    yAxisLabel: "Level (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  h_c = IFFT(H_c)
+  H_c_abs = ABS(H_c)
+  H_c_phase = ARG(H_c)
+  H_c_unwrap = UNWRAP_PHASE(H_c_phase)
+  h_c_oct = OCTFILTERRMS(H_c_abs)
+  rt60 = RT60(h_c)
+  p_impulse = VIS_TIMESIG(h_c, arg=impulse_vis)
+  p_magnitude = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_octave = VIS_OCTBARS(h_c_oct, arg=octave_vis)
+  p_rt60 = VIS_RT60(rt60, arg=rt60_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_magnitude
+        - type: visualization
+          contextKey: p_rt60
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_octave

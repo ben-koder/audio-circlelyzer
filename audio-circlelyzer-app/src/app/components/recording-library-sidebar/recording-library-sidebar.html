@@ -1,0 +1,224 @@
+<aside class="library-shell">
+  <!-- Compact top bar: active preset + workspace tools button -->
+  <div class="library-topbar">
+    <div class="library-topbar__preset">
+      <span class="library-topbar__eyebrow">Preset</span>
+      <span class="library-topbar__name">{{ currentPreset()?.name ?? 'None' }}</span>
+    </div>
+    <div class="library-topbar__actions">
+      <!-- Mode is now driven implicitly by recording state: live while a take is active,
+           review otherwise. We only display the current mode as a non-interactive badge. -->
+      <span class="mode-status-badge"
+        [class.mode-status-badge--live]="isOnlineMode()"
+        [class.mode-status-badge--offline]="!isOnlineMode()"
+        [title]="isOnlineMode() ? 'Recording \u2014 live analysis' : 'Review mode (start a recording to go live)'">
+        @if (isOnlineMode()) {
+          <svg viewBox="0 0 24 24" class="mode-icon" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" fill="currentColor"/>
+            <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          Live
+        } @else {
+          <svg viewBox="0 0 24 24" class="mode-icon" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18M9 21V9"/>
+          </svg>
+          Review
+        }
+      </span>
+      <button type="button" class="btn btn-ghost btn-xs" (click)="openPresetTools()" [disabled]="isRecording()" title="Manage presets">Presets</button>
+    </div>
+  </div>
+
+  <!-- Source / excitation controls have moved to the top-bar Source dropdown. -->
+
+  <div class="library-collapse library-collapse--grow" [class.library-collapse--open]="demosOpen()">
+    <button type="button" class="library-collapse__title" (click)="demosOpen.set(!demosOpen())">
+      <div>
+        <p class="library-header__eyebrow">Demos</p>
+        <h2>Built-in</h2>
+      </div>
+      <div class="library-collapse__title-end">
+        <span class="badge badge-outline badge-sm">{{ demoEntries().length }}</span>
+        <svg class="library-collapse__chevron" [class.library-collapse__chevron--open]="demosOpen()" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </button>
+    @if (demosOpen()) {
+      <div class="library-collapse__content library-collapse__content--scrollable">
+
+        @if (demoCatalogState() === 'loading' && demoEntries().length === 0) {
+          <div class="library-empty library-empty--compact">
+            <p class="library-empty__title">Loading demos</p>
+            <p>Fetching deterministic preview and validation fixtures.</p>
+          </div>
+        } @else if (demoCatalogState() === 'error') {
+          <div class="library-empty library-empty--compact">
+            <p class="library-empty__title">Demo catalog unavailable</p>
+            <p>{{ demoCatalogError() || 'The built-in demo index could not be loaded.' }}</p>
+          </div>
+        } @else if (demoEntries().length === 0) {
+          <div class="library-empty library-empty--compact">
+            <p class="library-empty__title">No demos yet</p>
+            <p>Built-in preview and validation recordings will appear here.</p>
+          </div>
+        } @else {
+          <div class="library-list library-list--compact">
+            @for (demo of demoEntries(); track demo.id) {
+              <button
+                type="button"
+                class="library-row library-row--demo"
+                [class.library-row--active]="demo.id === selectedDemoId()"
+                [attr.title]="isRecording() ? 'Stop recording first' : demo.description"
+                [disabled]="isRecording()"
+                (click)="demoLoadRequested.emit(demo.id)"
+              >
+                <div class="library-row__copy">
+                  <span class="library-row__title">{{ demo.title }}</span>
+                  <span class="library-row__meta">{{ formatCategory(demo.category) }}</span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="library-collapse library-collapse--grow" [class.library-collapse--open]="recordingsOpen()">
+    <button type="button" class="library-collapse__title" (click)="recordingsOpen.set(!recordingsOpen())">
+      <div>
+        <p class="library-header__eyebrow">Recording Library</p>
+        <h2>Recordings</h2>
+      </div>
+      <div class="library-collapse__title-end">
+        <!-- Discreet workspace import/export controls -->
+        <button type="button"
+          class="library-workspace-btn"
+          (click)="requestWorkspaceImport($event)"
+          [disabled]="isRecording()"
+          title="Import recording workspace (.workspace.json)"
+          aria-label="Import workspace">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/>
+          </svg>
+        </button>
+        <button type="button"
+          class="library-workspace-btn"
+          (click)="requestWorkspaceExport($event)"
+          [disabled]="isRecording()"
+          title="Export recording workspace"
+          aria-label="Export workspace">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21V9"/><path d="M7 14l5-5 5 5"/><path d="M5 3h14"/>
+          </svg>
+        </button>
+        <span class="badge badge-outline badge-sm">{{ recordings().length }}</span>
+        <svg class="library-collapse__chevron" [class.library-collapse__chevron--open]="recordingsOpen()" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </button>
+    @if (recordingsOpen()) {
+      <div class="library-collapse__content library-collapse__content--scrollable">
+
+        @if (recordings().length === 0) {
+          <div class="library-empty">
+            <p class="library-empty__title">No recordings yet</p>
+            <p>Press Record (or use the simulation controls) to capture a take. Stopping the recording switches to Review mode automatically.</p>
+          </div>
+        } @else {
+          <div class="library-list library-list--compact">
+            @for (recording of recordings(); track recording.metadata.id) {
+              <article class="library-recording"
+                [class.library-recording--active]="recording.metadata.id === selectedRecordingId()"
+                [class.library-recording--unsaved]="isUnsaved(recording.metadata.id)">
+                <button
+                  type="button"
+                  class="library-row library-row--recording"
+                  [disabled]="isRecording()"
+                  [attr.title]="isRecording() ? 'Stop recording first' : null"
+                  (click)="recordingSelected.emit(recording.metadata.id)"
+                >
+                  <div class="library-row__copy">
+                    <div class="library-row__header">
+                      @if (editingRecordingId() === recording.metadata.id) {
+                        <input
+                          type="text"
+                          class="library-row__name-input"
+                          [value]="editingRecordingName()"
+                          (input)="onRenameInputChange($event)"
+                          (keydown)="onRenameKeydown($event, recording)"
+                          (blur)="commitRename(recording)"
+                          (click)="$event.stopPropagation()"
+                          autofocus
+                        />
+                      } @else {
+                        <span class="library-row__title"
+                          (dblclick)="beginRenameRecording($event, recording)"
+                          title="Double-click to rename">
+                          {{ recording.metadata.name }}
+                          @if (isUnsaved(recording.metadata.id)) {
+                            <span class="library-row__unsaved-tag" title="Unsaved \u2014 will be discarded if you start a new recording">unsaved</span>
+                          }
+                        </span>
+                      }
+                      <span class="library-row__date">{{ formatCreatedAt(recording.metadata.createdAt) }}</span>
+                    </div>
+                    <span class="library-row__meta">{{ formatSignalType(recording.metadata.sourceType) }} · {{ recording.metadata.recordingChannelCount }} ch · {{ recording.metadata.recordingLength }} smp</span>
+                    @if (recording.metadata.preset.name) {
+                      <span class="library-row__meta">Preset: {{ recording.metadata.preset.name }}</span>
+                    }
+                  </div>
+                  <span class="badge badge-ghost badge-xs">
+                    {{ recording.metadata.captureMode === 'microphone' ? 'Mic' : 'Sim' }}
+                  </span>
+                </button>
+
+                <div class="library-recording__actions">
+                  @if (isUnsaved(recording.metadata.id)) {
+                    <button type="button"
+                      class="library-recording__action library-recording__action--save"
+                      (click)="saveRecording($event, recording.metadata.id)"
+                      [disabled]="isRecording()"
+                      title="Save recording (keep it when starting a new take)"
+                      aria-label="Save recording">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                      </svg>
+                    </button>
+                  }
+                  <button type="button"
+                    class="library-recording__action library-recording__action--rename"
+                    (click)="beginRenameRecording($event, recording)"
+                    [disabled]="isRecording()"
+                    title="Rename recording"
+                    aria-label="Rename recording">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 20h9"/>
+                      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+                    </svg>
+                  </button>
+                  <button type="button"
+                    class="library-recording__action library-recording__action--remove"
+                    (click)="removeRecording($event, recording.metadata.id)"
+                    [disabled]="isRecording()"
+                    title="Remove recording"
+                    aria-label="Remove recording">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6"/>
+                      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+
+</aside>

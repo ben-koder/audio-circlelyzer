@@ -1,0 +1,160 @@
+id: phase-analysis
+name: Phase Analysis
+description: |
+  Phase analysis of a transfer function using the direct ramp-DFT method.
+  Demonstrates group delay, phase delay, unwrapped phase, minimum-phase
+  decomposition, and impulse response alignment.
+
+  Calculation chain:
+    H = Y/X                           (transfer function)
+    GROUP_DELAY(H)                    → τ_g[k] in samples (no phase unwrapping)
+    PHASE_FROM_GROUP_DELAY(H)         → Θ[k] unwrapped phase (integrates τ_g)
+    PHASE_DELAY(Θ)                    → τ_φ[k] in samples
+    MINIMUM_PHASE(H)                  → H_min (cepstral method)
+    DIVIDE(H, H_min)                  → A (all-pass component, |A|≈1)
+    GROUP_DELAY(A)                    → τ_excess[k] (excess group delay)
+    ALIGN_MINIMUM_PHASE_EXCESS(H)     → H_aligned (propagation delay removed)
+    IFFT(H_aligned)                   → aligned impulse response h_aligned[n]
+
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 8192
+  n_y: 11
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Transfer Magnitude",
+    description: "Magnitude response of the underlying transfer function used for the phase-analysis chain.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  group_delay_vis = {
+    title: "Group Delay",
+    description: "Direct ramp-DFT estimate of group delay without phase unwrapping.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Delay (samples)"
+  }
+  excess_gd_vis = {
+    title: "Excess Group Delay",
+    description: "Group delay of the all-pass residual H/H_min: τ_excess = -d∠(H/H_min)/dω. Reveals the non-minimum-phase (e.g. propagation / reflection) component of the response, as in REW's minimum-phase view.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Delay (samples)"
+  }
+  phase_vis = {
+    title: "Phase From Group Delay",
+    description: "Unwrapped phase reconstructed by integrating the direct group-delay estimate.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  phase_delay_vis = {
+    title: "Phase Delay",
+    description: "Phase delay derived from the reconstructed unwrapped phase.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Delay (samples)"
+  }
+  min_mag_vis = {
+    title: "Minimum-Phase Magnitude",
+    description: "Magnitude response of the cepstrally-derived minimum-phase component.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  allpass_mag_vis = {
+    title: "All-Pass Magnitude",
+    description: "Magnitude of the all-pass residual obtained after removing the minimum-phase component.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  aligned_ir_vis = {
+    title: "Aligned Impulse Response",
+    description: "Impulse response after removing onset delay via minimum-phase excess alignment.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  # Transfer function (multi-cycle averaging is now applied at the y_c read
+  # site via n_average in the top-bar source dropdown, so we no longer need
+  # the INPUTN/COMPACT/NOISEFLOOR chain here).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+
+  # --- Phase analysis (direct ramp-DFT method) ---
+  H_c_gd     = GROUP_DELAY(H_c)
+  H_c_theta  = PHASE_FROM_GROUP_DELAY(H_c)
+  H_c_pd     = PHASE_DELAY(H_c_theta)
+
+  # --- Minimum-phase / all-pass decomposition ---
+  H_c_min    = MINIMUM_PHASE(H_c)
+  H_c_allpass = DIVIDE(H_c, H_c_min)
+  # Excess group delay: group delay of the all-pass component, i.e.
+  # τ_excess(ω) = -d∠(H/H_min)/dω.  Same quantity REW plots as
+  # "excess group delay" — highlights propagation / reflection structure.
+  H_c_excess_gd = GROUP_DELAY(H_c_allpass)
+
+  # --- Impulse response alignment (Approach 4) ---
+  H_c_aligned = ALIGN_MINIMUM_PHASE_EXCESS(H_c)
+  h_aligned   = IFFT(H_c_aligned)
+
+  # --- Magnitude for comparison ---
+  H_c_abs     = ABS(H_c)
+  H_min_abs   = ABS(H_c_min)
+  H_allpass_abs = ABS(H_c_allpass)
+
+  # --- Visualizations ---
+  p_magnitude    = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_group_delay  = VIS_GROUP_DELAY(H_c_gd, arg=group_delay_vis)
+  p_phase        = VIS_PHASE(H_c_theta, arg=phase_vis)
+  p_phase_delay  = VIS_PHASE_DELAY(H_c_pd, arg=phase_delay_vis)
+  p_min_mag      = VIS_ABSSPEC(H_min_abs, arg=min_mag_vis)
+  p_allpass_mag  = VIS_ABSSPEC(H_allpass_abs, arg=allpass_mag_vis)
+  p_aligned_ir   = VIS_TIMESIG(h_aligned, arg=aligned_ir_vis)
+  p_excess_gd    = VIS_GROUP_DELAY(H_c_excess_gd, arg=excess_gd_vis)
+
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: split
+          direction: vertical
+          splitRatio: 0.5
+          children:
+            - type: visualization
+              contextKey: p_magnitude
+            - type: visualization
+              contextKey: p_group_delay
+        - type: split
+          direction: vertical
+          splitRatio: 0.5
+          children:
+            - type: visualization
+              contextKey: p_phase
+            - type: visualization
+              contextKey: p_phase_delay
+    - type: split
+      direction: horizontal
+      splitRatio: 0.33
+      children:
+        - type: visualization
+          contextKey: p_min_mag
+        - type: split
+          direction: horizontal
+          splitRatio: 0.5
+          children:
+          - type: visualization
+            contextKey: p_allpass_mag
+          - type: split
+            direction: vertical
+            splitRatio: 0.5
+            children:
+              - type: visualization
+                contextKey: p_excess_gd
+              - type: visualization
+                contextKey: p_aligned_ir

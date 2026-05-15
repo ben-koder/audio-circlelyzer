@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "kind": "nonlinear-poly-regression-joint",
+  "sampleRate": 48000.0,
+  "model": {
+    "derivatives": 2,
+    "degree": 3
+  },
+  "forcingScale": 287071.7630503152,
+  "expectedCoefficients": {
+    "y": 0.076635889807609,
+    "ydot": 6.270209166077101e-05,
+    "yddot": 3.4834495367095003e-06,
+    "y^3": 0.043543119208868754
+  },
+  "dominantMonomials": [
+    "y",
+    "ydot",
+    "yddot",
+    "y^3"
+  ],
+  "coefficientRelativeTolerance": 0.05,
+  "zeroCoefficientAbsTolerance": 0.001,
+  "notes": "Expected coefficients are for the normalized excitation stored in the archive."
+}

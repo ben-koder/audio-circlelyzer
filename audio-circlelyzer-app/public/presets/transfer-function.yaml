@@ -1,0 +1,91 @@
+id: transfer-function
+name: Transfer Function
+description: Transfer function analysis between two recording channels (Y1/Y0)
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 8192
+  n_y: 10
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Transfer Magnitude (Y1 / Y0)",
+    description: "Magnitude of the transfer function between recording channel 1 and recording channel 0.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  wrapped_phase_vis = {
+    title: "Wrapped Phase (Y1 / Y0)",
+    description: "Principal-value phase of the transfer function before unwrapping.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  unwrapped_phase_vis = {
+    title: "Unwrapped Phase (Y1 / Y0)",
+    description: "Unwrapped transfer-function phase for the channel-to-channel measurement.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  impulse_vis = {
+    title: "Impulse Response (Y1 / Y0)",
+    description: "Time-domain impulse response between the two selected recording channels.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  octave_vis = {
+    title: "Octave-Band Levels (Y1 / Y0)",
+    description: "Octave-band RMS energy derived from the channel-to-channel transfer function.",
+    xAxisLabel: "Octave Band",
+    yAxisLabel: "Level (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown), so we operate directly on
+  # y_c instead of the previous INPUTN/COMPACT/NOISEFLOOR chain.
+  # y_c is auto-bandpassed by the global active frequency range from the
+  # top-bar dual slider, so per-channel FFTs inherit the band-limiting.
+  arg_c0 = { channelSums:[[0]] }
+  arg_c1 = { channelSums:[[1]] }
+  y_c_0 = CHANNELSUM(y_c, arg=arg_c0)
+  y_c_1 = CHANNELSUM(y_c, arg=arg_c1)
+  Y_0 = FFT(y_c_0)
+  Y_1 = FFT(y_c_1)
+  H = DIVIDE(Y_1, Y_0)
+  H_abs = ABS(H)
+  H_arg = ARG(H)
+  H_phase = UNWRAP_PHASE(H_arg)
+  h = IFFT(H)
+  h_oct = OCTFILTERRMS(H_abs)
+  p_impulse = VIS_TIMESIG(h, arg=impulse_vis)
+  p_magnitude = VIS_ABSSPEC(H_abs, arg=magnitude_vis)
+  p_arg = VIS_PHASE(H_arg, arg=wrapped_phase_vis)
+  p_phase = VIS_PHASE(H_phase, arg=unwrapped_phase_vis)
+  p_octave = VIS_OCTBARS(h_oct, arg=octave_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.33
+      children:
+        - type: visualization
+          contextKey: p_magnitude
+        - type: split
+          direction: horizontal
+          splitRatio: 0.5
+          children:
+            - type: visualization
+              contextKey: p_arg
+            - type: visualization
+              contextKey: p_phase
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_octave

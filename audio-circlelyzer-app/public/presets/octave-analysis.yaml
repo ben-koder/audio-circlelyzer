@@ -1,0 +1,72 @@
+id: octave-analysis
+name: Octave Analysis
+description: Comprehensive room acoustics analysis with impulse response, octave bands, and frequency response
+signalType: PERFECT_WHITE
+scriptVariables: {}
+settings:
+  nc: 16384
+  n_y: 100
+defaultFrequencyRange:
+  low: 40
+  high: 20000
+script: |
+  magnitude_vis = {
+    title: "Transfer Magnitude",
+    description: "Magnitude response of the measured transfer function.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Magnitude (dB)"
+  }
+  phase_vis = {
+    title: "Unwrapped Phase",
+    description: "Unwrapped phase of the measured transfer function.",
+    xAxisLabel: "Frequency (Hz)",
+    yAxisLabel: "Phase (rad)"
+  }
+  impulse_vis = {
+    title: "Impulse Response",
+    description: "Time-domain impulse response reconstructed from the transfer function.",
+    xAxisLabel: "Time (s)",
+    yAxisLabel: "Amplitude"
+  }
+  octave_vis = {
+    title: "Octave-Band Levels",
+    description: "Octave-band RMS energy derived from the transfer-function magnitude.",
+    xAxisLabel: "Octave Band",
+    yAxisLabel: "Level (dB)"
+  }
+  # Coherent multi-cycle averaging is applied at the y_c read site
+  # (n_average in the top-bar source dropdown).
+  # Y_c is implicit: the FFT of y_c, automatically band-limited to the
+  # active frequency range from the top-bar dual slider.
+  X_c = FFT(x_c)
+  H_c = DIVIDE(Y_c, X_c)
+  h_c = IFFT(H_c)
+  H_c_abs = ABS(H_c)
+  H_c_phase = ARG(H_c)
+  H_c_unwrap = UNWRAP_PHASE(H_c_phase)
+  h_c_oct = OCTFILTERRMS(H_c_abs)
+  p_impulse = VIS_TIMESIG(h_c, arg=impulse_vis)
+  p_magnitude = VIS_ABSSPEC(H_c_abs, arg=magnitude_vis)
+  p_phase = VIS_PHASE(H_c_unwrap, arg=phase_vis)
+  p_octave = VIS_OCTBARS(h_c_oct, arg=octave_vis)
+layout:
+  type: split
+  direction: vertical
+  splitRatio: 0.5
+  children:
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_magnitude
+        - type: visualization
+          contextKey: p_phase
+    - type: split
+      direction: horizontal
+      splitRatio: 0.5
+      children:
+        - type: visualization
+          contextKey: p_impulse
+        - type: visualization
+          contextKey: p_octave
