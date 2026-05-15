@@ -1,12 +1,4 @@
-# Circular Signal Design: Phase Spectrum Optimization for Linear and Nonlinear Analysis (v2)
-
-> Revised in response to the validation report
-> ([../THEORY_VALIDATION_RESULT.md](../THEORY_VALIDATION_RESULT.md)).
-> Substantive changes are summarised in [CHANGES.md](CHANGES.md). Key
-> revisions: linear-vs-log sweep is now framed as a genuine trade-off,
-> the matched-filter rule is explicitly restricted to the kernel diagonal
-> for systems with memory, the degenerate boxed formula in §3.11 is
-> removed, and the ZC "real-part" crest factor is clarified.
+# Circular Signal Design: Phase Spectrum Optimization for Linear and Nonlinear Analysis
 
 > **Companion document to [CIRCULAR_SIGNAL_ANALYSIS.md](CIRCULAR_SIGNAL_ANALYSIS.md), [CIRCULAR_NONLINEAR-SIGNAL_ANALYSIS.md](CIRCULAR_NONLINEAR-SIGNAL_ANALYSIS.md), and [CIRCULAR_SIGNAL_PHASE_ANALYSIS.md](CIRCULAR_SIGNAL_PHASE_ANALYSIS.md)**
 >

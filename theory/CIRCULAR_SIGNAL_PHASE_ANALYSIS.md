@@ -1,13 +1,4 @@
-# Circular Signal Phase Analysis (v2)
-
-> Revised in response to the validation report
-> ([../THEORY_VALIDATION_RESULT.md](../THEORY_VALIDATION_RESULT.md)).
-> Substantive changes are summarised in [CHANGES.md](CHANGES.md). The
-> mathematical core (group-delay formula, single-DFT packing, wrap-bias
-> formula, centre-time / mean-group-delay duality, cepstral
-> minimum-phase/all-pass decomposition) is unchanged from v1; this
-> revision adds an explicit Nyquist-bin handling note for fractional
-> shifts.
+# Circular Signal Phase Analysis
 
 ## Table of Contents
 

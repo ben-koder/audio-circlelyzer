@@ -1,12 +1,4 @@
-# Nonlinear System Characterization in the Circular Signal Analysis Framework (v2)
-
-> Revised in response to the validation report
-> ([../THEORY_VALIDATION_RESULT.md](../THEORY_VALIDATION_RESULT.md)).
-> Substantive changes are summarised in [CHANGES.md](CHANGES.md). Key
-> revisions: BLA "single realisation" wording is now explicitly an
-> estimator statement, and the unified matched-filter rule is qualified
-> as recovering the kernel diagonal / harmonic IR for systems with
-> memory (exact only for memoryless nonlinearity).
+# Nonlinear System Characterization in the Circular Signal Analysis Framework
 
 > **Companion document to [CIRCULAR_SIGNAL_ANALYSIS.md](CIRCULAR_SIGNAL_ANALYSIS.md)**
 > This document extends the circular signal analysis framework to weakly nonlinear systems. It explores how the framework's unique properties — exact periodicity, precise spectral control, multi-cycle noise separation — can be leveraged for nonlinear system identification.

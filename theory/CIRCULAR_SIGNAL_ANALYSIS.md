@@ -1,12 +1,4 @@
-# Circular Signal Analysis (v2)
-
-> Revised in response to the validation report
-> ([../THEORY_VALIDATION_RESULT.md](../THEORY_VALIDATION_RESULT.md)). Substantive
-> changes are summarised in [CHANGES.md](CHANGES.md). The mathematical core
-> is unchanged from v1; this revision tightens wording, fixes an
-> over-conservative steady-state estimate, reframes the multi-source
-> section around the real-stimulus constraint, and explicitly states the
-> super-resolution limit of "spectral expansion".
+# Circular Signal Analysis
 
 ## Table of Contents
 
