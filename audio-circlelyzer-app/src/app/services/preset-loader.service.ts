@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { ContextPreset, normalizeContextPreset } from '../models/context-presets';
 import { WasmService } from './wasm.service';
 import * as wasm from '../../assets/wasm/audio_circlelyzer_wasm.js';
@@ -16,6 +17,7 @@ interface PresetIndex {
 })
 export class PresetLoaderService {
   private readonly wasmService = inject(WasmService);
+  private readonly document = inject(DOCUMENT);
   private loadedPresets: ContextPreset[] = [];
   private initialized = false;
 
@@ -32,8 +34,10 @@ export class PresetLoaderService {
     await this.wasmService.initialize();
 
     try {
-      // Fetch the preset index
-      const indexResponse = await fetch('/presets/index.yaml');
+      // Fetch the preset index — resolve relative to <base href> so the path
+      // is correct regardless of the deployment sub-directory.
+      const base = this.document.baseURI;
+      const indexResponse = await fetch(new URL('presets/index.yaml', base).href);
       if (!indexResponse.ok) {
         console.warn('Could not load preset index, using empty preset list');
         return [];
@@ -45,7 +49,7 @@ export class PresetLoaderService {
       // Load each preset file
       const presetPromises = index.presets.map(async (filename) => {
         try {
-          const response = await fetch(`/presets/${filename}`);
+          const response = await fetch(new URL(`presets/${filename}`, base).href);
           if (!response.ok) {
             console.warn(`Could not load preset: ${filename}`);
             return null;
