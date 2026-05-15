@@ -5,7 +5,7 @@
     "ng": "ng",
     "build:wasm": "rm -rf ../audio-circlelyzer-wasm/pkg && cd ../audio-circlelyzer-wasm && wasm-pack build --target web --release && cd ../audio-circlelyzer-app && npm run copy:wasm",
     "build:wasm:watch": "cd ../audio-circlelyzer-wasm && wasm-pack build --target web --watch",
-    "copy:wasm": "rm -f src/assets/wasm/*.js src/assets/wasm/*.wasm src/assets/wasm/*.d.ts src/assets/wasm/package.json public/*circlelyzer_wasm*.js public/*circlelyzer_wasm*.wasm public/*circlelyzer_wasm*.d.ts public/package.json && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* public/ && if [ -f ../audio-circlelyzer-wasm/pkg/package.json ]; then cp ../audio-circlelyzer-wasm/pkg/package.json src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/package.json public/; fi",
+    "copy:wasm": "mkdir -p src/assets/wasm && rm -f src/assets/wasm/*.js src/assets/wasm/*.wasm src/assets/wasm/*.d.ts src/assets/wasm/package.json public/*circlelyzer_wasm*.js public/*circlelyzer_wasm*.wasm public/*circlelyzer_wasm*.d.ts public/package.json && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/audio_circlelyzer_wasm* public/ && if [ -f ../audio-circlelyzer-wasm/pkg/package.json ]; then cp ../audio-circlelyzer-wasm/pkg/package.json src/assets/wasm/ && cp ../audio-circlelyzer-wasm/pkg/package.json public/; fi",
     "prebuild": "npm run build:wasm",
     "serve": "ng serve",
     "start": "npm run build:wasm && ng serve",
